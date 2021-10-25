@@ -6,9 +6,13 @@ library(ggplot2)
 library(dplyr)
 library(data.table)
 library(mgcv)
+library(parallel)
 
 # read in additional functions
 source("R/00_functions.R")
+
+# set up cores for parallel processing
+cl <- makeCluster(detectCores())
 
 # read in the rds for total monthly views
 average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/daily_average_views_10-languages.rds") # daily average views
@@ -21,19 +25,8 @@ languages <- names(average_daily_views)
 # get names of classes from the tribble
 classes <- names(average_daily_views[[1]])
 
-views_lambdas_df <- list()
-
-# main code ----
-#for(i in 1:length(average_daily_views)){
+run_SAI_change <- function(views){
   
-  #views_lambdas_dataframe <- list()
-  
- # for(j in 1:length(average_daily_views[[i]])){
-  
-    # wikipedia page views data for a particular language/class combination
-    # specified by i and j
-    views <- average_daily_views[[1]][[1]]
-    
     # convert to wide format
     views_wide <- tidyr::pivot_wider(views, 
                               names_from = c(year, month), 
@@ -94,18 +87,22 @@ views_lambdas_df <- list()
                                              limiter=TRUE)
     
     # convert list of lambdas to data frame
-    views_lambdas_dataframe[[j]] <- do.call(rbind, views_lambdas_list)
-
-  }
-  
-  views_lambdas_df[[i]] <- views_lambdas_dataframe
-  
-  print(languages[i])
+    views_lambdas_dataframe <- do.call(rbind, views_lambdas_list)
+    
+    return(views_lambdas_dataframe)
 
 }
 
 
 
+# run function for SAI trends for a single language/class combination
+SAI_trends <- run_SAI_change(average_daily_views[[1]])
+
+
+parLapply(cl, average_daily_views[[1]], SAI_trends)
+    
+    
+  
 
 
 
