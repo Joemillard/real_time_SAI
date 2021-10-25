@@ -1,30 +1,29 @@
 ## script for calculating the trend for each language, adjusted for random, and then aggregated for all languages
 # will need to initially weight all classes equally in in the infile, and then weight by relative species richness of each class
 
-# set up the packages required
-library(ggplot2)
-library(dplyr)
-library(data.table)
-library(mgcv)
+# for parallel session
 library(parallel)
-
-# read in additional functions
-source("R/00_functions.R")
 
 # set up cores for parallel processing
 cl <- makeCluster(detectCores())
 
-# read in the rds for total monthly views
-average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/daily_average_views_10-languages.rds") # daily average views
+# read in packages and data for each parallel session
+clusterEvalQ(cl, {
+  
+  # set up the packages required
+  library(dplyr)
+  library(data.table)
+  library(mgcv)
+  
+  # read in additional functions
+  source("R/00_functions.R")
+  
+  # read in the rds for total monthly views
+  average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/daily_average_views_10-languages.rds") # daily average views
+  
+})
 
-# this section is unimportant. it is just for navigating the tribble
-
-# get names of languages from the tribble
-languages <- names(average_daily_views)
-
-# get names of classes from the tribble
-classes <- names(average_daily_views[[1]])
-
+# set up the function for calculating trends
 run_SAI_change <- function(views){
   
     # convert to wide format
@@ -96,15 +95,15 @@ run_SAI_change <- function(views){
 
 
 # run function for SAI trends for a single language/class combination
-SAI_trends <- run_SAI_change(average_daily_views[[1]])
+# SAI_trends <- run_SAI_change(average_daily_views[[1]])
 
 
-parLapply(cl, average_daily_views[[1]], SAI_trends)
+SAI_trends <- parLapply(cl, average_daily_views[[1]], run_SAI_change)
     
     
   
 
-
+stopCluster(cl)
 
 
 
