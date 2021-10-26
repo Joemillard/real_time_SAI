@@ -7,6 +7,9 @@ library(parallel)
 # set up cores for parallel processing
 cl <- makeCluster(detectCores())
 
+# read in the rds for total monthly views
+average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/daily_average_views_10-languages.rds") # daily average views
+
 # read in packages and data for each parallel session
 clusterEvalQ(cl, {
   
@@ -17,10 +20,7 @@ clusterEvalQ(cl, {
   
   # read in additional functions
   source("R/00_functions.R")
-  
-  # read in the rds for total monthly views
-  average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/daily_average_views_10-languages.rds") # daily average views
-  
+
 })
 
 # set up the function for calculating trends
@@ -92,29 +92,19 @@ run_SAI_change <- function(views){
 
 }
 
+SAI_trends <- list()
 
-
-# run function for SAI trends for a single language/class combination
-# SAI_trends <- run_SAI_change(average_daily_views[[1]])
-
-
-SAI_trends <- parLapply(cl, average_daily_views[[1]], run_SAI_change)
-    
-    
+# iterate througheach class/lamgauge combo
+system.time({
+  for(i in 1:length(average_daily_views)){
   
-
+    SAI_trends[[i]] <- parLapply(cl, average_daily_views[[i]], fun = run_SAI_change)
+    
+    print(i)
+  
+  }
+})
+    
 stopCluster(cl)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+saveRDS(SAI_trends, "species_trends.RDS")
