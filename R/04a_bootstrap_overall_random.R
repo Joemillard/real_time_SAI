@@ -14,7 +14,7 @@ for(i in 1:length(language_views)){
 }
 
 # set up vector of column names
-date_vec <- c(colnames(language_views[[1]][,4:59]), "X2020_03")
+date_vec <- c("X2015_07", colnames(language_views[[1]][,4:59]))
 
 # set up language vector
 language_vec <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
