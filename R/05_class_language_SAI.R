@@ -27,7 +27,6 @@ for(i in 1:length(random_trend)){
 
 # bind together and plot the random trends
 random_trend_figure <- rbindlist(random_trend) %>%
-  #mutate(Year = as.numeric(Year)) %>%
   mutate(language = factor(language, levels = c("ar", "fr", "zh", "en", "de", "es", "it", "ja", "pt" , "ru"),
                            labels = c("Arabic", "French", "Chinese", "English", "German", "Spanish", "Italian", "Japanese", "Portuguese", "Russian"))) %>%
   ggplot() +
@@ -35,51 +34,12 @@ random_trend_figure <- rbindlist(random_trend) %>%
   geom_line(aes(x = Year, y = LPI_final, group = language)) +
   geom_ribbon(aes(x = Year, ymin = CI_low, ymax = CI_high, group = language), alpha = 0.3) +
   scale_y_continuous("Random index", breaks = c(0.6, 1, 1.4, 1.8)) +
-  #scale_x_continuous(NULL, breaks = c(2016, 2017, 2018, 2019, 2020), labels = c(2016, 2017, 2018, 2019, 2020)) +
   facet_wrap(~language) +
   theme_bw() +
   theme(panel.grid = element_blank())
 
 # string for pollinating classes, plus random
 classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
-
-# read in the view data for all taxonomic classes
-# loop through each directory and create a list of all files for users
-view_directories <- function(classes, directory){
-  
-  # bring in all the files in that directory and assign to a list
-  view_files <- list()
-  for(i in 1:length(languages)){
-    view_files[[i]] <- list.files(directory, pattern = languages[i])
-  }
-  
-  # unlist the files in the correct order
-  file_order <- unlist(view_files)
-  
-  # set up empty list for files for each language
-  user_files_dir <- list()
-  user_files <- list()
-  
-  # set up each of the file directories and order consisten with the random overall trend
-  for(i in 1:length(classes)){
-    user_files[[i]] <- list.files(directory, pattern = classes[i])
-    user_files[[i]] <- user_files[[i]][order(match(user_files[[i]], file_order))]
-    user_files_dir[[i]] <- paste0(directory, "/", user_files[[i]])
-  }
-  
-  # return list of full file paths for each language
-  return(user_files_dir)
-}
-
-# run the function with 10 languages, specifying the directory
-user_files <- view_directories(classes,
-                               directory)
-
-# read in all the files in groups for each language
-language_views <- list()
-system.time(for(i in 1:length(user_files)){
-  language_views[[i]] <- lapply(user_files[[i]], fread, encoding = "UTF-8", stringsAsFactors = FALSE)
-})
 
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()
