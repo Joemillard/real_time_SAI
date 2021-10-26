@@ -7,50 +7,6 @@
 
 # functions ----
 
-# remove time series which have fewer than the number of counts specified in 'count_thres' and which are shorter than
-# the length specified in 'min_ts_length'
-cull_fn <- function(pop_data, count_thres, min_ts_length, c) {
-  
-  # create a vector to hold row names of time series that meet the thresholds
-  notna <- vector()
-  
-  # set counter to record number of time series that meet the thresholds
-  counter <- 1
-  
-  # this was added to avoid problems with row names in tibbles
-  pop_data2 <- as.data.frame(pop_data)
-  #colnames(pop_data2) <- seq_along(colnames(pop_data))sl
-  rownames(pop_data2) <- seq_along(rownames(pop_data))
-  
-  # loop over each row
-  for (i in 1:nrow(pop_data)) {
-    
-    # check whether the number of observations meets the threshold
-    if (length(which(!is.na(pop_data[i,1:c]))) >= count_thres) {
-      
-      # check whether the length of the time series (from first to last observation) meets the threshold
-      if ((max(as.numeric(colnames(pop_data[i,1:c][which(!is.na(pop_data[i,1:c]))]))) - 
-           min(as.numeric(colnames(pop_data[i,1:c][which(!is.na(pop_data[i,1:c]))])))) >= (min_ts_length - 1)) {
-        
-        # if the time series passes both tests, add its row number to the vector notna
-        notna[counter] <- rownames(pop_data2[i,1:c])
-        
-        # increase the counter
-        counter <- counter + 1
-        
-      }
-      
-    }
-    
-  }
-  
-  # create a new data frame, including only time series that meet the thresholds
-  pop_data_culled <- pop_data[rownames(pop_data) %in% notna,]
-  
-  return(pop_data_culled)
-  
-}
-
 ## function to interpolate missing population data using the chain method
 chain_fn <- function(pop_data_culled, c, m_colnames, silent=FALSE) {
   
