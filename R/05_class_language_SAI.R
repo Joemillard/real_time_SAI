@@ -3,12 +3,8 @@
 library(data.table)
 library(dplyr)
 library(ggplot2)
-library(lme4)
 library(boot)
-library(RColorBrewer)
-library(viridis)
 library(forcats)
-library(cowplot)
 
 # source the functions R script
 source("R/00. functions.R")
@@ -18,33 +14,31 @@ source("R/00. functions.R")
 species_trends <- here::here("outputs/species_trends.rds")
 
 # read in the string of languages - original order sorted alphabetically for files read in
-languages <- c("\\^es_", "\\^fr_", "\\^de_", "\\^ja_", "\\^it_", "\\^ar_", "\\^ru_", "\\^pt_", "\\^zh_", "\\^en_")
+languages <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
 
 # read in the lambda files 
-random_trend <- readRDS("outputs/random_trends.rds")
+random_trend <- readRDS("outputs/overall_random.rds")
 
 # adjust each of the lambda values for random
 # adjust the year column
 for(i in 1:length(random_trend)){
-  random_trend[[i]]$date <- as.numeric(rownames(random_trend[[i]]))
-  random_trend[[i]]$Year <- (random_trend[[i]]$date - 1970)/12 + 2015
-  random_trend[[i]]$Year <- as.character(random_trend[[i]]$Year)
-  
-  # calculate lambda for random
-  random_trend[[i]] <- random_trend[[i]] %>%
-    filter(date %in% c(1977:2033))
-  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:57])))
-  random_trend[[i]]$date <- paste("X", random_trend[[i]]$date, sep = "")
   random_trend[[i]]$language <- languages[i]
 }
 
 # bind together and plot the random trends
-rbindlist(random_trend) %>%
+random_trend_figure <- rbindlist(random_trend) %>%
+  #mutate(Year = as.numeric(Year)) %>%
+  mutate(language = factor(language, levels = c("ar", "fr", "zh", "en", "de", "es", "it", "ja", "pt" , "ru"),
+                           labels = c("Arabic", "French", "Chinese", "English", "German", "Spanish", "Italian", "Japanese", "Portuguese", "Russian"))) %>%
   ggplot() +
+  geom_hline(yintercept = 1, linetype = "dashed", size = 1) +
   geom_line(aes(x = Year, y = LPI_final, group = language)) +
   geom_ribbon(aes(x = Year, ymin = CI_low, ymax = CI_high, group = language), alpha = 0.3) +
+  scale_y_continuous("Random index", breaks = c(0.6, 1, 1.4, 1.8)) +
+  #scale_x_continuous(NULL, breaks = c(2016, 2017, 2018, 2019, 2020), labels = c(2016, 2017, 2018, 2019, 2020)) +
   facet_wrap(~language) +
-  theme_bw()
+  theme_bw() +
+  theme(panel.grid = element_blank())
 
 # string for pollinating classes, plus random
 classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
