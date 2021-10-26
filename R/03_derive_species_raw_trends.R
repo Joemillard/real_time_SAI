@@ -26,6 +26,12 @@ clusterEvalQ(cl, {
 # set up the function for calculating trends
 run_SAI_change <- function(views){
   
+    # arrange views by date
+    views <- views %>%
+      group_by(q_wikidata) %>%
+      arrange(date) %>%
+      ungroup()
+  
     # convert to wide format
     views_wide <- tidyr::pivot_wider(views, 
                               names_from = c(year, month), 
@@ -56,14 +62,12 @@ run_SAI_change <- function(views){
     # add a unique species id
     views_wide$SpecID <- seq_along(views_wide$q_wikidata)
     
-    # remove all time series that do not meet minimum length and observation # thresholds
-    views_wide_culled <- cull_fn(views_wide, 
-                                 count_thres=2, 
-                                 min_ts_length=57, columns) %>%
-      mutate(copied = 1)
+    # remove any rows with NA and add 1 for following function
+    views_wide <- views_wide[complete.cases(views_wide), ]
+    views_wide$copied <- 1
     
     # GAM the population indices, checking the fit and marking those that dont fit well
-    views_gammed <- gam_fn(views_wide_culled, 
+    views_gammed <- gam_fn(views_wide, 
                            columns, 
                            m_colnames)
     
