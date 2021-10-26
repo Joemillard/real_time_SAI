@@ -26,8 +26,7 @@ split_biodiversity_pages <- split(biodiversity_pages, biodiversity_pages$site)
 
 # filter all pages from random that are species pages
 filter_species <- function(data_file, split_biodiversity_pages){
-  data_fin <- anti_join(data_file, split_biodiversity_pages, by = c("article" = "title")) %>%
-    rename("wikipedia_id" = "q_wikidata")
+  data_fin <- anti_join(data_file, split_biodiversity_pages, by = c("article" = "title"))
   return(data_fin)
 }
 
@@ -35,7 +34,7 @@ filter_species <- function(data_file, split_biodiversity_pages){
 for(i in 1:length(average_daily_views)){
   average_daily_views[[i]] <- filter_species(data_file = average_daily_views[[i]], 
                                              split_biodiversity_pages = split_biodiversity_pages[[i]]) %>%
-    select(article, wikipedia_id, year, month, av_views, date)
+    select(article, q_wikidata, year, month, av_views, date)
 }
 
 # set up cores for parallel processing
@@ -128,7 +127,6 @@ system.time({
     random_trends <- parLapply(cl, average_daily_views, fun = run_SAI_change)
 })
 
-
 stopCluster(cl)
 
-saveRDS(random_trends, "species_trends.RDS")
+saveRDS(random_trends, "random_trends.RDS")
