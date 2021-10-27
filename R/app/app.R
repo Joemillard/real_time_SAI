@@ -83,12 +83,7 @@ server <- function(input, output) {
   output$class_language_SAI <-  renderPlot({
   
     # plot all the class level trends
-    class_language_SAI %>%
-      mutate(Year = as.numeric(Year)) %>%
-      mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia"),
-                           labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians"))) %>%
-      mutate(language = factor(language, levels = c("\\^ar_", "\\^zh_", "\\^en_", "\\^fr_", "\\^de_", "\\^it_", "\\^ja_", "\\^pt_", "\\^ru_", "\\^es_"),
-                               labels = c("Arabic", "Chinese", "English", "French", "German", "Italian", "Japanese", "Portuguese", "Russian", "Spanish"))) %>%
+    class_language %>%
       ggplot() +
       geom_ribbon(aes(x = Year, ymin = LPI_lwr, ymax = LPI_upr, fill = taxa), alpha = 0.4) +
       geom_line(aes(x = Year, y = LPI, colour = taxa)) +
