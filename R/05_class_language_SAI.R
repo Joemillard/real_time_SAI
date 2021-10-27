@@ -11,18 +11,29 @@ source("R/00. functions.R")
 
 # script for pollinator models using new language data
 # read in the random rds file
-species_trends <- here::here("outputs/species_trends.rds")
+species_trends <- readRDS(here::here("outputs/species_trends.rds"))
+
+# set up vector of column names
+date_vec <- c("2015_07", colnames(species_trends[[1]][[1]][,3:58]))
+
+# add initial value of 1 to each species page
+for(i in 1:length(species_trends)){
+  for(j in 1:length(species_trends[[i]])){
+  species_trends[[i]][[j]] <- data.frame(append(species_trends[[i]][[j]], list(X2015_07 = 1), after = match("SpecID", names(species_trends[[i]][[j]]))))
+  }
+}
 
 # read in the string of languages - original order sorted alphabetically for files read in
 languages <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
 
 # read in the lambda files 
-random_trend <- readRDS("outputs/overall_random.rds")
+random_trend <- readRDS(here::here("outputs/overall_random.rds"))
 
 # adjust each of the lambda values for random
 # adjust the year column
 for(i in 1:length(random_trend)){
   random_trend[[i]]$language <- languages[i]
+  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:57])))
 }
 
 # bind together and plot the random trends
@@ -44,10 +55,10 @@ classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "repti
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()
 all_lambdas <- list()
-for(i in 1:length(language_views)){
-  for(j in 1:length(random_trend)){
-    data_file <- language_views[[i]][[j]]
-    adj_lambdas[[j]] <- cbind(data_file[, 1:3], sweep(data_file[, 4:ncol(data_file)], 2, random_trend[[j]]$lamda, FUN = "-"))
+for(i in 1:length(species_trends)){
+  for(j in 1:length(species_trends[[i]])){
+    data_file <- species_trends[[i]][[j]]
+    adj_lambdas[[j]] <- cbind(data_file[, 1:2], sweep(data_file[, 3:ncol(data_file)], 2, random_trend[[i]]$lamda, FUN = "-"))
   }
   all_lambdas[[i]] <- adj_lambdas
 }
@@ -82,17 +93,17 @@ smooth_all_groups <- function(data_file){
   
   # smooth the series for each row (species)
   for(i in 1:nrow(data_file)){
-    smoothed_indices[[i]] <- smooth_series(X = as.numeric(as.vector(data_file[i, 5:ncol(data_file)])))
+    smoothed_indices[[i]] <- smooth_series(X = as.numeric(as.vector(data_file[i, 4:ncol(data_file)])))
     smoothed_indices[[i]] <- create_lambda(smoothed_indices[[i]])
   }
   
   smoothed_lambda <- as.data.frame(do.call(rbind, smoothed_indices))
   
   # add back in the original column names
-  colnames(smoothed_lambda) <- colnames(data_file)[4:ncol(data_file)]
+  colnames(smoothed_lambda) <- colnames(data_file)[3:ncol(data_file)]
   
   # bind the adjusted smoothed lambda back onto the first four columns
-  smoothed_lambda <- cbind(data_file[,1:3], smoothed_lambda)
+  smoothed_lambda <- cbind(data_file[,1:2], smoothed_lambda)
   
   return(smoothed_lambda)
   
@@ -108,9 +119,9 @@ for(i in 1:length(all_lambdas)){
 ###
 
 # reassign correct names for each element in list
-names(smoothed_adjusted_lamda) <- (c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data"))
+names(smoothed_adjusted_lamda) <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en") 
 for(i in 1:length(smoothed_adjusted_lamda)){
-  names(smoothed_adjusted_lamda[[i]]) <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
+  names(smoothed_adjusted_lamda[[i]]) <- (c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia"))
 }
 
 # Function to calculate index from lambdas selected by 'ind'
@@ -120,7 +131,7 @@ create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
   lambdas_new <- lambdas[complete.cases(lambdas), ]
   
   # select columns from lambda file to calculate mean, and build a cumprod trend
-  lambda_data <- lambdas_new[, 5:ncol(lambdas_new)]
+  lambda_data <- lambdas_new[, 4:ncol(lambdas_new)]
   this_lambdas <- lambda_data[ind, ]
   mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
   trend <- cumprod(10^c(0, mean_ann_lambda))
@@ -135,7 +146,7 @@ run_each_group <- function(lambda_files, random_trend){
   
   # Construct dataframe and get mean and 95% intervals
   boot_res <- data.frame(LPI = dbi.boot$t0)
-  boot_res$Year <- random_trend$Year[1:(nrow(random_trend))]
+  boot_res$Year <- random_trend
   boot_res$LPI_upr <- apply(dbi.boot$t, 2, quantile, probs = c(0.975), na.rm = TRUE) 
   boot_res$LPI_lwr <- apply(dbi.boot$t, 2, quantile, probs = c(0.025), na.rm = TRUE)
   return(boot_res)
@@ -146,14 +157,14 @@ lpi_trends_adjusted <- list()
 bound_trends <- list()
 for(i in 1:length(smoothed_adjusted_lamda)){
   for(j in 1:length(smoothed_adjusted_lamda[[i]])){
-    lpi_trends_adjusted[[j]] <- run_each_group(smoothed_adjusted_lamda[[i]][[j]], random_trend[[j]]) %>%
-      mutate(language = random_trend[[j]]$language)
+    lpi_trends_adjusted[[j]] <- run_each_group(smoothed_adjusted_lamda[[i]][[j]], date_vec) %>%
+      mutate(taxa = classes[j])
     
   }
   
   # bind together the trends for that language
   bound_trends[[i]] <- rbindlist(lpi_trends_adjusted) %>%
-    mutate(taxa = classes[i])
+    mutate(language = languages[i])
 }
 
 # bind together the trend for all languages
@@ -164,12 +175,12 @@ formatter <- function(...){
 }
 
 # plot all the class level trends
-fin_bound_trends %>%
-  mutate(Year = as.numeric(Year)) %>%
-  filter(taxa != "random_data") %>%
+fin_bound_trends %>% 
+  mutate(Year = paste(Year, "_01", sep = "")) %>%
+  mutate(Year = as.Date(Year, "%Y_%m_%d")) %>%
   mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia"),
                        labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians"))) %>%
-  mutate(language = factor(language, levels = c("\\^ar_", "\\^zh_", "\\^en_", "\\^fr_", "\\^de_", "\\^it_", "\\^ja_", "\\^pt_", "\\^ru_", "\\^es_"),
+  mutate(language = factor(language, levels = c("ar", "zh", "en", "fr", "de", "it", "ja", "pt", "ru", "es"),
                            labels = c("Arabic", "Chinese", "English", "French", "German", "Italian", "Japanese", "Portuguese", "Russian", "Spanish"))) %>%
   ggplot() +
   geom_ribbon(aes(x = Year, ymin = LPI_lwr, ymax = LPI_upr, fill = taxa), alpha = 0.4) +
@@ -191,4 +202,4 @@ fin_bound_trends %>%
         legend.title = element_text(size = 13),
         legend.text = element_text(size = 11))
 
-ggsave("outputs/random_adjusted_class_SAI_free_1000_95_no-random-species_smoothed.png", scale = 1.5, dpi = 350)
+ggsave("class_language_validation.png", scale = 1.5, dpi = 350)
