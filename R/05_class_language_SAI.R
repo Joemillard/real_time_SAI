@@ -174,32 +174,14 @@ formatter <- function(...){
   function(x) format(round(x, 1), ...)
 }
 
-# plot all the class level trends
-fin_bound_trends %>% 
+# amend data frame for plotting
+class_language <- fin_bound_trends %>% 
   mutate(Year = paste(Year, "_01", sep = "")) %>%
   mutate(Year = as.Date(Year, "%Y_%m_%d")) %>%
   mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia"),
                        labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians"))) %>%
   mutate(language = factor(language, levels = c("ar", "zh", "en", "fr", "de", "it", "ja", "pt", "ru", "es"),
-                           labels = c("Arabic", "Chinese", "English", "French", "German", "Italian", "Japanese", "Portuguese", "Russian", "Spanish"))) %>%
-  ggplot() +
-  geom_ribbon(aes(x = Year, ymin = LPI_lwr, ymax = LPI_upr, fill = taxa), alpha = 0.4) +
-  geom_line(aes(x = Year, y = LPI, colour = taxa)) +
-  geom_hline(yintercept = 1, linetype = "88", size = 0.3, alpha = 0.3) +
-  scale_fill_manual("Taxonomic class", values = c("black", "#FF7F00", "#377EB8", "#4DAF4A", "#F781BF", "#A65628")) +
-  scale_colour_manual("Taxonomic class", values = c("black", "#FF7F00", "#377EB8", "#4DAF4A", "#F781BF", "#A65628")) +
-  scale_y_continuous(breaks = c(0, 0.5, 1, 1.5), labels = function(x) ifelse(x == 0, "0", x)) +
-  facet_grid(language~taxa) +
-  ylab("Species Awareness Index (SAI)") +
-  xlab(NULL) +
-  theme_bw() +
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
-        axis.text.y = element_text(size = 11), 
-        axis.title.y = element_text(size = 13, vjust = 2),
-        strip.text.y = element_text(size = 11, angle = 45),
-        strip.text.x = element_text(size = 11),
-        legend.title = element_text(size = 13),
-        legend.text = element_text(size = 11))
+                           labels = c("Arabic", "Chinese", "English", "French", "German", "Italian", "Japanese", "Portuguese", "Russian", "Spanish")))
 
-ggsave("class_language_validation.png", scale = 1.5, dpi = 350)
+# save file for Shiny app - this file needs to be written SQL database
+saveRDS(class_language, "outputs/shiny_outputs/class_language.rds")
