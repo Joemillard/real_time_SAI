@@ -167,5 +167,3 @@ lpi_trends_adjusted <- lpi_trends_adjusted %>%
 
 saveRDS(lpi_trends_adjusted, "outputs/shiny_outputs/overall.rds")
 
-
-

@@ -78,7 +78,7 @@ create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
   lambdas_new <- lambdas[complete.cases(lambdas), ]
   
   # select columns from lambda file to calculate mean, and build a cumprod trend
-  lambda_data <- lambdas_new[, 2:ncol(lambdas_new)]
+  lambda_data <- lambdas_new[, 4:ncol(lambdas_new)]
   this_lambdas <- lambda_data[ind, ]
   mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
   trend <- cumprod(10^c(0, mean_ann_lambda))
@@ -113,7 +113,7 @@ smooth_all_groups <- function(data_file){
 run_each_group <- function(lambda_files, random_trend){
   
   # Bootstrap these to get confidence intervals
-  dbi.boot <- boot(lambda_files, create_lpi, R = 1000)
+  dbi.boot <- boot(lambda_files, create_lpi, R = 100)
   
   # Construct dataframe and get mean and 95% intervals
   boot_res <- data.frame(LPI = dbi.boot$t0)
@@ -129,3 +129,53 @@ for(i in 1:length(all_lambdas)){
   smoothed_adjusted_lamda[[i]] <- lapply(all_lambdas[[i]], smooth_all_groups)
   print(i)
 }
+
+# assign column for taxa
+for(i in 1:length(smoothed_adjusted_lamda)){
+  for(j in 1:length(smoothed_adjusted_lamda[[i]]))
+    smoothed_adjusted_lamda[[i]][[j]]$taxa <- classes[j]
+}
+
+###
+# function for binding all the lambdas together and calculate average for each q_wikidata
+wiki_average <- function(data_file){
+  data_fin <- data_file %>%
+    reshape2::melt(id = c("q_wikidata", "SpecID", "taxa")) %>%
+    mutate(variable = as.character(variable)) %>%
+    group_by(q_wikidata, taxa, variable) %>%
+    summarise(mean_val = mean(value)) %>%
+    ungroup()
+  return(data_fin)
+}
+
+# rbindlist all lambda together and calculate averge for each species across languages
+merge_species <- list()
+for(i in 1:length(smoothed_adjusted_lamda)){
+  merge_species[[i]] <- rbindlist(smoothed_adjusted_lamda[[i]])
+}
+
+# merge all the lambda files, and calc average across each q_wikidata
+merge_species <- rbindlist(merge_species) %>% 
+  wiki_average()
+
+# reshape lambda files back into year rows, and then split into separate taxonomic classes
+cast_lambda <- reshape2::dcast(merge_species, q_wikidata + taxa ~ variable)
+all_lambdas <- split(cast_lambda, cast_lambda$taxa)
+
+# run the boostrapping of trends for each lambda, and adjust for the random of that language
+lpi_trends_adjusted <- list()
+for(i in 1:length(all_lambdas)){
+  lpi_trends_adjusted[[i]] <- run_each_group(all_lambdas[[i]], date_vec) %>%
+    mutate(taxa = classes[i])
+}
+
+# plot all the class level trends with point for whether increasing or decreasing
+class_trend <- rbindlist(lpi_trends_adjusted) %>%
+  mutate(Year = paste(Year, "_01", sep = "")) %>%
+  mutate(Year = as.Date(Year, "%Y_%m_%d"))  %>%
+  mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia"),
+                       labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians")))
+  
+
+saveRDS(class_trend, "outputs/shiny_outputs/class_trend.rds")
+
