@@ -96,30 +96,8 @@ ui <- shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")),
                               column(4)
                             ),
                             fluidRow(
-                              
-                              style = "height:50px;")
-                            
-                            
-                            
-                   ), # Closes the first tabPanel called "Home"
-                   tabPanel("TRENDS", value = "TRENDS",
-                      fluidRow(
-                        column(6,
-                               plotOutput("overall_SAI"),
-                               h6("The overall species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
-                        column(6,
-                               plotOutput("class_SAI"),
-                               h6("The species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish separated by taxonomic by class (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles)."))),
-                      fluidRow(
-                        column(6,
-                               plotOutput("class_language_SAI"),
-                               h6("The species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages for July 2015–March 2020 (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
-                        column(6,
-                               plotOutput("class_language_change"),
-                               h6("Average monthly rate of change for the species page species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages (error bars, predicted values of a linear model, fitting average monthly change in the species page SAI as a function of taxonomic class, Wikipedia language, and their interaction). Fitted values are from the linear model with the R function predict (points), and 95% CIs are from the fitted values ± 1.96 multiplied by the SE."))
-                      )),
+                              style = "height:50px;")),
                    tabPanel("ABOUT", value = "about",
-                            
                             fluidRow(
                               column(2),
                               column(8,
@@ -186,14 +164,12 @@ ui <- shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")),
                                                       )
                                                ),
                                                column(3)
-                                               
                                              )
                                          )
                                      ) # Closes div panel
                               ), # Closes column
                               column(2)
                             ),
-                            
                             fluidRow(
                               column(2),
                               column(8,
@@ -212,9 +188,68 @@ ui <- shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")),
                                      column(2)
                               )
                             )
-                            
-                   )  # Closes About tab
-                   
+                   ), 
+                   tabPanel("TRENDS", value = "TRENDS",
+                            fluidRow(
+                              column(6,
+                                     plotOutput("overall_SAI"),
+                                     h6("The overall species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                              column(6,
+                                     plotOutput("class_SAI"),
+                                     h6("The species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish separated by taxonomic by class (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles)."))),
+                            fluidRow(
+                              column(6,
+                                     plotOutput("class_language_SAI"),
+                                     h6("The species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages for July 2015–March 2020 (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                              column(6,
+                                     plotOutput("class_language_change"),
+                                     h6("Average monthly rate of change for the species page species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages (error bars, predicted values of a linear model, fitting average monthly change in the species page SAI as a function of taxonomic class, Wikipedia language, and their interaction). Fitted values are from the linear model with the R function predict (points), and 95% CIs are from the fitted values ± 1.96 multiplied by the SE."))
+                            )), # Closes About tab,
+                            tabPanel("DATA", value = "DATA",
+                                     tabsetPanel(
+                                       tabPanel("What is the SAI?", 
+                                                fluidRow(style="text-align: center; margin: auto; width: 80%;",
+                                                         h3(strong("What does the Species Awareness Index (SAI) tell us?")),
+                                                         p(style="text-align: justify;", 
+                                                           "Some text"),        
+                                                         p(style="text-align: justify;", "More text")
+                                                )
+                                       ),
+                                       
+                                       tabPanel("How is it calculated?", 
+                                                fluidRow(style="text-align: center; margin: auto; width: 80%;",
+                                                         h3(strong("How is the SAI calculated?")),
+                                                         p(style="text-align: justify;", 
+                                                           "Some text"),        
+                                                         p(style="text-align: justify;", "More text")
+                                                )
+                                       )
+                                     )
+                            ),
+                   tabPanel("DOWNLOAD", value = "DOWNLOAD",
+                            fluidRow(
+                              column(2),
+                              column(8,
+                                     # Panel for Background on team
+                                     # Panel for Background on team
+                                     div(class="panel panel-default",
+                                         div(class="panel-body",  
+                                             h5("Download the data behind the Species Awareness Index"),
+                                             tags$p(h6("The Species Awareness Index contains trends for tens of thousands of species.")),
+                                             tags$p(h6("This dataset contains time-series of page-view data for species between 2015 and 2020. Each species 
+                                                      is represented by page-view trends in up to 10 languages, controlled for overall change in page-views 
+                                                      for that wikipedia language ")), 
+                                             tags$p(h6("Please tick the box below to agree to our data-use agreement: "), tags$a(href="data_agreement_2020.pdf", "data_agreement_2020.pdf")),
+                                             checkboxInput("download_check",
+                                                           label = "Agree"
+                                             ),
+                                             downloadButton("download_alldata", "Download")
+                                         )
+                                     )
+                              ),
+                              column(2)
+                            )
+                   )  # Closes the second tabPanel called "Download"
 )
 )
 
