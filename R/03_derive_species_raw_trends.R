@@ -38,13 +38,13 @@ run_SAI_change <- function(views){
                                    values_from = av_views, 
                                    id_cols=c(year, month, av_views, q_wikidata))
   
+  # save names of columns containing av_views values in a variable
+  colnames_var <- colnames(views_wide[,2:length(views_wide)])
+  
   # move the q_wikidata column to the end
   views_wide <- relocate(views_wide, 
                          q_wikidata, 
                          .after = last_col())
-  
-  # save names of columns containing av_views values in a variable
-  colnames_var <- colnames(views_wide[,2:length(views_wide)])
   
   # create a variable with temporary numeric column names
   m_colnames <- 1:(length(views_wide)-1)
@@ -77,7 +77,7 @@ run_SAI_change <- function(views){
                              m_colnames)
   
   # put saved column names back in
-  colnames(views_complete) <- c(colnames_var, 
+  colnames(views_complete) <- c(colnames_var,
                                 "q_wikidata", 
                                 "PopID", 
                                 "SpecID",
