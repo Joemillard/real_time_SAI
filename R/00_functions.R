@@ -1,12 +1,12 @@
-# functions to create Generalized Additive Models and calculate monthly growth rates
+# functions to create Generalized Additive Models of population time series and calculate monthly growth rates
 # based on parts of the rlpi package available at
 # https://github.com/Zoological-Society-of-London/rlpi.
 #
 
 ## gam function ----
 
-# function to GAM population time series
-gam_fn <- function(new.pop_data, silent=FALSE) {
+# function to GAM time series
+gam_fn <- function(new.pop_data) {
   
   # create a list to put resampled populations into
   gam_poplist <- list()
@@ -128,12 +128,6 @@ gam_fn <- function(new.pop_data, silent=FALSE) {
     # add GAM'd population to list
     gam_poplist[[counter]] <- pred.a
     
-    #if (silent==FALSE) {
-      
-      print(paste("completed GAM of population ", counter, sep=""))
-      
-    #}
-    
     # increment counter  
     counter <- counter + 1
     
@@ -166,7 +160,7 @@ gam_fn <- function(new.pop_data, silent=FALSE) {
 ## species lambda function ----
 
 # function to create species lambdas from interpolated populations
-species_lambdas_fn <- function(pop_data, limiter=FALSE, silent=FALSE) {
+species_lambdas_fn <- function(pop_data, limiter=FALSE) {
   
   # create list to hold the lambdas
   lambdas.list <- list()
