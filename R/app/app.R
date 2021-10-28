@@ -39,19 +39,15 @@ server <- function(input, output) {
   
     # main text plot -- collapse together the average lambda at each start point for each class, add last row for value 57, and then stick LPI values back on
     overall_SAI %>%
-      mutate(Year = as.numeric(Year)) %>%
       ggplot() +
       geom_ribbon(aes(x = Year, ymin = LPI_lwr, ymax = LPI_upr), alpha = 0.3) +
       geom_line(aes(x = Year, y = LPI)) +
       geom_hline(yintercept = 1, linetype = "dashed", size = 1) +
-      ylab("Unweighted Species Awareness Index (SAI)") +
-      scale_y_continuous(breaks = c(1.08, 1.04, 1, 0.96), labels = c("1.08", "1.04","1", "0.96")) +
+      scale_y_continuous(breaks = c(1.05, 1, 0.95, 0.9, 0.85, 0.8), labels = c("1.05","1", "0.95", "0.9", "0.85", "0.8")) +
+      ylab("Species Awareness Index (SAI)") +
       xlab(NULL) +
       theme_bw() +
-      theme(panel.grid = element_blank(),
-            axis.text.x = element_blank(),
-            axis.text = element_text(size = 11),
-            axis.title.y = element_text(size = 12, vjust = 2))
+      theme(panel.grid = element_blank())
     
   })
   

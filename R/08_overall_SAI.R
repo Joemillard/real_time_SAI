@@ -78,7 +78,7 @@ create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
   lambdas_new <- lambdas[complete.cases(lambdas), ]
   
   # select columns from lambda file to calculate mean, and build a cumprod trend
-  lambda_data <- lambdas_new[, 2:ncol(lambdas_new)]
+  lambda_data <- lambdas_new[, 3:ncol(lambdas_new)]
   this_lambdas <- lambda_data[ind, ]
   mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
   trend <- cumprod(10^c(0, mean_ann_lambda))
@@ -113,7 +113,7 @@ smooth_all_groups <- function(data_file){
 run_each_group <- function(lambda_files, random_trend){
   
   # Bootstrap these to get confidence intervals
-  dbi.boot <- boot(lambda_files, create_lpi, R = 1000)
+  dbi.boot <- boot(lambda_files, create_lpi, R = 100)
   
   # Construct dataframe and get mean and 95% intervals
   boot_res <- data.frame(LPI = dbi.boot$t0)
@@ -156,37 +156,16 @@ merge_species <- rbindlist(merge_species) %>%
 # reshape lambda files back into year rows, and then split into separate taxonomic classes
 all_lambdas <- reshape2::dcast(merge_species, q_wikidata  ~ variable)
 
-
-
-
 # run the boostrapping of trends for all lambda, and adjust for the random of that language
 lpi_trends_adjusted <- run_each_group(all_lambdas, random_trend = date_vec)
 
-
-
-# add the language jack-knifed for each grouping
-bound_trends <- list()
-for(i in 1:length(lpi_trends_adjusted)){
-  bound_trends[[i]] <- lpi_trends_adjusted[[i]] %>%
-    mutate(language_jack = languages_orig[i])
-}
-
 # collapse together the average lambda at each start point for ecah class, add last row for value 57, and then stick LPI values back on
-jack_knifed_class <- rbindlist(bound_trends) %>%
-  mutate(Year = as.numeric(Year)) %>%
-  ggplot() +
-  geom_ribbon(aes(x = Year, ymin = LPI_lwr, ymax = LPI_upr), alpha = 0.3) +
-  geom_line(aes(x = Year, y = LPI)) +
-  geom_hline(yintercept = 1, linetype = "dashed", size = 1) +
-  scale_fill_manual("Excluded language", values = c("black", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999")) +
-  scale_colour_manual("Excluded language", values = c("black", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999")) +
-  scale_y_continuous(breaks = c(1.05, 1, 0.95, 0.9, 0.85, 0.8), labels = c("1.05","1", "0.95", "0.9", "0.85", "0.8")) +
-  ylab("User-weighted Species Awareness Index (SAI)") +
-  xlab(NULL) +
-  theme_bw() +
-  theme(panel.grid = element_blank())
+lpi_trends_adjusted <- lpi_trends_adjusted %>%
+  mutate(Year = paste(Year, "_01", sep = "")) %>%
+  mutate(Year = as.Date(Year, "%Y_%m_%d")) 
 
 
+saveRDS(lpi_trends_adjusted, "outputs/shiny_outputs/overall.rds")
 
 
 
