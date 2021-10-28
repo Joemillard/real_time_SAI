@@ -68,13 +68,13 @@ run_SAI_change <- function(views){
                                    values_from = av_views, 
                                    id_cols=c(year, month, av_views, q_wikidata))
   
+  # save names of columns containing av_views values in a variable
+  colnames_var <- colnames(views_wide[,2:length(views_wide)])
+  
   # move the q_wikidata column to the end
   views_wide <- relocate(views_wide, 
                          q_wikidata, 
                          .after = last_col())
-  
-  # save names of columns containing av_views values in a variable
-  colnames_var <- colnames(views_wide[,2:length(views_wide)])
   
   # create a variable with temporary numeric column names
   m_colnames <- 1:(length(views_wide)-1)
@@ -95,24 +95,24 @@ run_SAI_change <- function(views){
   # remove any rows with NA and add 1 for following function
   views_wide <- views_wide[complete.cases(views_wide), ]
   views_wide$copied <- 1
-  
+
   # GAM the population indices, checking the fit and marking those that dont fit well
   views_gammed <- gam_fn(views_wide, 
                          columns, 
                          m_colnames)
-
+  
   # log-linear interpolate populations that had poorly fitting GAMs
   views_complete <- chain_fn(views_gammed, 
                              columns, 
                              m_colnames)
   
   # put saved column names back in
-  colnames(views_complete) <- c(colnames_var, 
+  colnames(views_complete) <- c(colnames_var,
                                 "q_wikidata", 
                                 "PopID", 
                                 "SpecID",
                                 "copied")
-  
+
   # convert interpolated/imputed populations to rates of change
   # if you do not want to limit log rates of change to [-1,1] (LPI default) set limiter=FALSE
   views_lambdas_list <- species_lambdas_fn(views_complete, 
