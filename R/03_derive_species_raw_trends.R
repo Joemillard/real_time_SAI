@@ -8,7 +8,7 @@ library(parallel)
 cl <- makeCluster(detectCores())
 
 # read in the rds for total monthly views
-average_daily_views <- readRDS("C:/R_Projects/Joe/daily_average_views_10_languages.rds") # daily average views
+average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/average_daily_views_random_10-languages.rds") # daily average views
 
 # read in packages and data for each parallel session
 clusterEvalQ(cl, {
