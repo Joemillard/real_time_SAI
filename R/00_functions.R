@@ -655,4 +655,3 @@ species_lambdas_fn <- function(pop_data, c, limiter=FALSE, silent=FALSE) {
   return(spec_lambdas.list)
   
 }
-
