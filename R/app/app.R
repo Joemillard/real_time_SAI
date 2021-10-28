@@ -253,15 +253,16 @@ ui <- shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")),
 )
 )
 
-
-
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  class_language <- readRDS(here::here("outputs/shiny_outputs/class_language.rds"))
-  class_language_change <- readRDS(here::here("outputs/shiny_outputs/class_language_change.rds"))
-  class_SAI <- readRDS(here::here("outputs/shiny_outputs/class_trend.rds"))
-  overall_SAI <- readRDS(here::here("outputs/shiny_outputs/overall.rds"))
+  library(ggplot2)
+  library(dplyr)
+  
+  class_language <- readRDS("class_language.rds")
+  class_language_change <- readRDS("class_language_change.rds")
+  class_SAI <- readRDS("class_trend.rds")
+  overall_SAI <- readRDS("overall.rds")
   
   # need to make requests of our SAI API here, which pulls in a set of dataframes:
   # overall_SAI, class_SAI, class_language_SAI, class_language_change
