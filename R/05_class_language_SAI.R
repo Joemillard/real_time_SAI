@@ -14,12 +14,13 @@ source("R/00. functions.R")
 species_trends <- readRDS(here::here("outputs/species_trends.rds"))
 
 # set up vector of column names
-date_vec <- c("2015_07", colnames(species_trends[[1]][[1]][,3:58]))
+date_vec <- c(colnames(species_trends[[1]][[1]][,3:58]), "2020_03")
 
 # add initial value of 1 to each species page
 for(i in 1:length(species_trends)){
   for(j in 1:length(species_trends[[i]])){
-  species_trends[[i]][[j]] <- data.frame(append(species_trends[[i]][[j]], list(X2015_07 = 1), after = match("SpecID", names(species_trends[[i]][[j]]))))
+    species_trends[[i]][[j]] <- data.frame(append(species_trends[[i]][[j]], list(X2015_07 = 1), after = match("SpecID", names(species_trends[[i]][[j]]))))
+    colnames(species_trends[[i]][[j]]) <- c("q_wikidata", "SpecID", date_vec)
   }
 }
 
