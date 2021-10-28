@@ -111,17 +111,10 @@ server <- function(input, output) {
   
     # add labels for factors, sort by predicted value for language and class, and then plot
     class_language_change %>%
-      mutate(taxonomic_class = factor(taxonomic_class, levels = c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia"),
-                                      labels = c("Ray finned fishes", "Amphibians", "Birds", "Insects", "Mammals", "Reptiles"))) %>%
-      
-      mutate(language = factor(language, levels = c("\\^ar_", "\\^fr_", "\\^zh_", "\\^en_", "\\^de_", "\\^es_", "\\^it_", "\\^ja_", "\\^pt_" , "\\^ru_"),
-                               labels = c("Arabic", "French", "Chinese", "English", "German", "Spanish", "Italian", "Japanese", "Portuguese", "Russian"))) %>%
-      mutate(taxonomic_class = fct_reorder(taxonomic_class, -predicted_values, median)) %>%
-      mutate(language = fct_reorder(language, -predicted_values, median)) %>%
       ggplot() + 
       geom_hline(yintercept = 0, linetype = "dashed", size = 1, colour = "grey") +
-      geom_errorbar(aes(x = 1, colour = taxonomic_class, y = predicted_values, ymin = (predicted_values - (1.96 * predicted_values_se)), ymax = (predicted_values + (1.96 * predicted_values_se))), position=position_dodge(width = 0.5), width = 0.2) +
-      geom_point(aes(x = 1, colour = taxonomic_class, y = predicted_values), position=position_dodge(width=0.5)) +
+      geom_errorbar(aes(x = 1, colour = taxa, y = predicted_values, ymin = (predicted_values - (1.96 * predicted_values_se)), ymax = (predicted_values + (1.96 * predicted_values_se))), position=position_dodge(width = 0.5), width = 0.2) +
+      geom_point(aes(x = 1, colour = taxa, y = predicted_values), position=position_dodge(width=0.5)) +
       ylab("Monthly change in Species Awareness Index (SAI)") +
       facet_wrap(~language) +
       scale_y_continuous(breaks = c(-0.015, -0.01, -0.005, 0, 0.005), labels = c("-0.015", "-0.010", "-0.005", "0", "0.005")) +
