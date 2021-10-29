@@ -349,8 +349,6 @@ server <- function(input, output) {
         geom_hline(yintercept = 0, linetype = "dashed", size = 1, colour = "grey") +
         geom_errorbar(aes(x = 1, colour = taxa, y = predicted_values, ymin = (predicted_values - (1.96 * predicted_values_se)), ymax = (predicted_values + (1.96 * predicted_values_se))), position=position_dodge(width = 0.5), width = 0.2) +
         geom_point_interactive(aes(x = 1, colour = taxa, y = predicted_values, tooltip = predicted_values), position=position_dodge(width=0.5)) +
-        #geom_point(aes(x = 1, colour = taxa, y = predicted_values), position=position_dodge(width=0.5)) +
-        
         ylab("Monthly change in SAI") +
         facet_wrap(~language) +
         scale_y_continuous(breaks = c(-0.015, -0.01, -0.005, 0, 0.005), labels = c("-0.015", "-0.010", "-0.005", "0", "0.005")) +
