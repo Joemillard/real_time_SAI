@@ -10,7 +10,7 @@ gam_fn <- function(new.pop_data) {
   
   # create a list to put resampled populations into
   gam_poplist <- list()
-
+  
   # create a vector of q_wikidata IDs
   q_wikidata <- new.pop_data$q_wikidata
   
@@ -20,16 +20,16 @@ gam_fn <- function(new.pop_data) {
   #rename columns to numeric
   colnames(new.pop_data) <- c("q_wikidata", seq(1, ncol(new.pop_data)-1))
   
-  # convert to long format
-  data_long <- tidyr::pivot_longer(new.pop_data, 
-                                   cols = where(is.numeric),
-                                   names_to = "year",
-                                   names_transform = list(year = as.numeric),
-                                   values_to = "count")
+  # convert to long format with reshape2 instead of tidyr
+  data_long <- reshape2::melt(new.pop_data, id = c("q_wikidata")) %>%
+    mutate(variable = as.numeric(variable)) %>%
+    rename(year = variable) %>%
+    rename(count = value) %>%
+    mutate(count = as.numeric(count))
   
   # start counter to track completed rows
   counter <- 1
-
+  
   # loop through q_wikidata IDs
   for (q in q_wikidata) {
     
@@ -84,7 +84,7 @@ gam_fn <- function(new.pop_data) {
     
     # finally, check whether the sum of the estimated degrees of freedom is close to 1
     if ((abs(sum(resid.gam$edf) - 1)) < 0.01) {
-
+      
       # if GAM fails the quality check ...
     } else {
       
@@ -141,7 +141,7 @@ gam_fn <- function(new.pop_data) {
     
     # output as a single row of NAs
     gam_popmat <- as.data.frame(matrix(NA, nrow=1, ncol=(ncol(new.pop_data)-1)))
-
+    
   }
   
   # restore q_wikidata column
@@ -152,7 +152,7 @@ gam_fn <- function(new.pop_data) {
   
   #restore column names
   colnames(gam_popmat) <- old_names
-
+  
   return(gam_popmat)
   
 }
@@ -164,7 +164,7 @@ species_lambdas_fn <- function(pop_data, limiter=FALSE) {
   
   # create list to hold the lambdas
   lambdas.list <- list()
-
+  
   # if there is nothing there...
   if(!any(!is.na(pop_data[,2:ncol(pop_data)])) & nrow(pop_data)==1) {
     
@@ -192,7 +192,7 @@ species_lambdas_fn <- function(pop_data, limiter=FALSE) {
     
     # get views and convert to matrix format
     sample_mat1.2 <- as.matrix(spec_popdata[,2:ncol(spec_popdata)])
-
+    
     # convert to lambda values
     sample_mat1.3_pt1 <- sample_mat1.2[,1:(ncol(sample_mat1.2)-1)]
     sample_mat1.3_pt2 <- sample_mat1.2[,2:ncol(sample_mat1.2)]
@@ -215,7 +215,7 @@ species_lambdas_fn <- function(pop_data, limiter=FALSE) {
       sample_mat5 <- as.data.frame((sample_mat1.8))
       
     }
-
+    
     sample_mat5$q_wikidata <- q
     
     # move id columns before year_month columns
@@ -223,7 +223,7 @@ species_lambdas_fn <- function(pop_data, limiter=FALSE) {
     
     # add lambdas to the matrix
     lambdas.list[[row]] <- sample_mat5
-
+    
   }
   
   return(lambdas.list)
