@@ -194,15 +194,19 @@ ui <- shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")),
                               column(6,
                                      plotOutput("overall_SAI"),
                                      h6("The overall species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                              
                               column(6,
                                      plotOutput("class_SAI"),
                                      h6("The species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish separated by taxonomic by class (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles)."))),
+                            
                             fluidRow(
+                              br(),
                               column(6,
                                      plotOutput("class_language_SAI"),
                                      h6("The species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages for July 2015–March 2020 (lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                              
                               column(6,
-                                     plotOutput("class_language_change"),
+                                     ggiraphOutput("class_language_change"),
                                      h6("Average monthly rate of change for the species page species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages (error bars, predicted values of a linear model, fitting average monthly change in the species page SAI as a function of taxonomic class, Wikipedia language, and their interaction). Fitted values are from the linear model with the R function predict (points), and 95% CIs are from the fitted values ± 1.96 multiplied by the SE."))
                             )), # Closes About tab,
                             tabPanel("DATA", value = "DATA",
@@ -258,6 +262,7 @@ server <- function(input, output) {
   
   library(ggplot2)
   library(dplyr)
+  library(ggiraph)
   
   class_language <- readRDS("class_language.rds")
   class_language_change <- readRDS("class_language_change.rds")
@@ -337,27 +342,30 @@ server <- function(input, output) {
   })
   
   # plot of total production vulnerability for each country
-  output$class_language_change <-  renderPlot({
+  output$class_language_change <- renderggiraph({
   
-    # add labels for factors, sort by predicted value for language and class, and then plot
-    class_language_change %>%
-      ggplot() + 
-      geom_hline(yintercept = 0, linetype = "dashed", size = 1, colour = "grey") +
-      geom_errorbar(aes(x = 1, colour = taxa, y = predicted_values, ymin = (predicted_values - (1.96 * predicted_values_se)), ymax = (predicted_values + (1.96 * predicted_values_se))), position=position_dodge(width = 0.5), width = 0.2) +
-      geom_point(aes(x = 1, colour = taxa, y = predicted_values), position=position_dodge(width=0.5)) +
-      ylab("Monthly change in SAI") +
-      facet_wrap(~language) +
-      scale_y_continuous(breaks = c(-0.015, -0.01, -0.005, 0, 0.005), labels = c("-0.015", "-0.010", "-0.005", "0", "0.005")) +
-      scale_colour_manual("Taxonomic class", values = c("black", "#FF7F00", "#377EB8", "#4DAF4A", "#F781BF", "#A65628")) +
-      theme_bw() +
-      theme(panel.grid = element_blank(),
-            axis.text.x = element_blank(), 
-            axis.title.x = element_blank(),
-            axis.ticks.x = element_blank(), legend.position = "none",
-            text = element_text(size = 16))
-    
-  })
-
+      class_language_change_fig <- class_language_change %>%
+        ggplot() + 
+        geom_hline(yintercept = 0, linetype = "dashed", size = 1, colour = "grey") +
+        geom_errorbar(aes(x = 1, colour = taxa, y = predicted_values, ymin = (predicted_values - (1.96 * predicted_values_se)), ymax = (predicted_values + (1.96 * predicted_values_se))), position=position_dodge(width = 0.5), width = 0.2) +
+        geom_point_interactive(aes(x = 1, colour = taxa, y = predicted_values, tooltip = predicted_values), position=position_dodge(width=0.5)) +
+        #geom_point(aes(x = 1, colour = taxa, y = predicted_values), position=position_dodge(width=0.5)) +
+        
+        ylab("Monthly change in SAI") +
+        facet_wrap(~language) +
+        scale_y_continuous(breaks = c(-0.015, -0.01, -0.005, 0, 0.005), labels = c("-0.015", "-0.010", "-0.005", "0", "0.005")) +
+        scale_colour_manual("Taxonomic class", values = c("black", "#FF7F00", "#377EB8", "#4DAF4A", "#F781BF", "#A65628")) +
+        theme_bw() +
+        theme(panel.grid = element_blank(),
+              axis.text.x = element_blank(), 
+              axis.title.x = element_blank(),
+              axis.ticks.x = element_blank(), legend.position = "none",
+              text = element_text(size = 16))
+      
+      #girafe(ggobj = class_language_change_fig)
+      ggiraph(code = print(class_language_change_fig), selection_type = "single")
+        
+  } )
 }
 
 # Run the application 
