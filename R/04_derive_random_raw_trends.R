@@ -88,8 +88,9 @@ run_SAI_change <- function(views){
 
 # iterate through each class/langauge combo
 system.time({
-    random_trends <- parLapply(cl, average_daily_views, fun = run_SAI_change)
+  random_trends <- parLapply(cl, average_daily_views, fun = run_SAI_change)
 })
+
 
 saveRDS(random_trends, "outputs/random_trends.RDS")
 
