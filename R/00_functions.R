@@ -229,3 +229,43 @@ species_lambdas_fn <- function(pop_data, limiter=FALSE) {
   return(lambdas.list)
   
 }
+
+# aggregate the views for each of birds, mammals, and insects
+run_dat <- function(terms_1, av_all){
+  
+  terms <- terms_1  
+  
+  terms$year <- substr(terms$timestamp, start = 1, stop = 4)
+  terms$month <- substr(terms$timestamp, start = 5, stop = 6)
+  terms$day <- substr(terms$timestamp, start = 7, stop = 8)
+  
+  terms <- terms %>%
+    select(article, q_wikidata, year, month, views)
+  
+  # calculate average per each month
+  terms_av <- terms %>%
+    group_by(article, q_wikidata, year, month) %>%
+    summarise(av_views = mean(views, na.rm = TRUE)) %>%
+    ungroup()
+  
+  if(av_all == TRUE) {
+    
+    # calculate average per each month
+    terms_av_year <- terms %>%
+      group_by(year, month) %>%
+      summarise(av_views = mean(views, na.rm = TRUE)) %>%
+      ungroup()
+    
+    terms_av_year$date <- paste(terms_av_year$year, terms_av_year$month, sep = "-")
+    terms_av_year$date <- as.Date(paste(terms_av_year$date,"-01",sep=""))
+    return(terms_av_year)
+    
+  }
+  
+  else{
+    terms_av$date <- paste(terms_av$year, terms_av$month, sep = "-")
+    terms_av$date <- as.Date(paste(terms_av$date,"-01",sep=""))
+    
+    return(terms_av)
+  }
+}

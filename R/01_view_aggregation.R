@@ -5,11 +5,12 @@ library(forcats)
 library(ggplot2)
 
 # read in additional functions
-source("R/00. functions.R")
+source("R/00_functions.R")
 
 # set up vector for languages, classes, and directory for views downloaded from Wikipedia API with Python
 languages <- c("^es_", "^fr_", "^de_", "^ja_", "^it_", "^ar_", "^ru_", "^pt_", "^zh_", "^en_")
-directory <- "D:/wikipedia_views/user_trends/"
+directory_new <- "D:/wikipedia_views/user_trends/trends_updated/"
+
 classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia")
 
 # read in the view data for all taxonomic classes
@@ -33,19 +34,29 @@ view_directories <- function(languages, directory, view_files){
 }
 
 # run the function with 10 languages, specifying the directory
-user_files <- view_directories(languages,
-                               directory)
+user_files_new <- view_directories(languages,
+                               directory_new)
 
 # read in all the files in groups for each language
-language_views <- list()
-system.time(for(i in 1:length(user_files)){
-  language_views[[i]] <- lapply(user_files[[i]], fread, encoding = "UTF-8", stringsAsFactors = FALSE)
+language_views_new <- list()
+system.time(for(i in 1:length(user_files_new)){
+  language_views_new[[i]] <- lapply(user_files_new[[i]], fread, encoding = "UTF-8", stringsAsFactors = FALSE)
 })
 
 # remove extra error columns from chinese dataframe - extra dataframe to avoid overwrite
-language_views_edit <- language_views
-language_views_edit[[9]][[1]] <- language_views_edit[[9]][[1]] %>%
-  dplyr::select(-title, -V2)
+language_views_edit <- language_views_new
+
+# remove extra error columns from dataframes
+for(i in 1:length(language_views_edit)){
+  for(j in 1:length(language_views_edit[[i]])){
+    if("title" %in% colnames(language_views_edit[[i]][[j]])){
+  language_views_edit[[i]][[j]] <- language_views_edit[[i]][[j]] %>%
+    dplyr::select(-title, -V10) %>%
+    dplyr::mutate(views = as.numeric(views))
+    }
+
+  }
+}
 
 # calculate total views for all languages
 total_views <- function(data_file){
@@ -64,9 +75,9 @@ total_views(language_views_edit) # 2227539617 (2.23 billion)
 # calculate total views for each language
 group_views <- function(data_file){
   language_total <- c(rep(0, 10))
-  for(i in 1:length(language_views)){
-    for(j in 1:length(language_views[[i]])){
-      language_total[[i]] <- language_total[[i]] + sum(language_views[[i]][[j]]$views, na.rm = TRUE)
+  for(i in 1:length(language_views_edit)){
+    for(j in 1:length(language_views_edit[[i]])){
+      language_total[[i]] <- language_total[[i]] + sum(language_views_edit[[i]][[j]]$views, na.rm = TRUE)
     }
   }
   
@@ -74,25 +85,6 @@ group_views <- function(data_file){
   language_total <- data.frame("language" = languages, "views" = language_total)
   return(language_total)
 }
-
-# run function for each language views and build bar plot
-plot_views <- group_views(language_views_edit) %>%
-  mutate(language = factor(language, levels = languages, 
-                           labels = c("Spanish", "French", "German", "Japanese", "Italian", 
-                                      "Arabic", "Russian", "Portuguese", "Chinese", "English"))) %>%
-  mutate(language = fct_reorder(language, -views)) %>%
-  ggplot() +
-  geom_bar(aes(x = language, y = views), stat = "identity") + 
-  geom_text(aes(x = language, y = views + 28000000, label = (round(views/1000000, digits = 2)))) +
-  xlab("Wiki project (language)") +
-  ylab("Total user views (millions)") +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 1200000000), 
-                     breaks = c(0, 300000000, 600000000, 900000000, 1200000000), labels = c("0", "300", "600", "900", "1200")) +
-  theme_bw() +
-  theme(panel.grid = element_blank())
-
-# save the plot
-ggsave("outputs/species_views_languages.png", dpi = 350, scale = 1)
 
 ## script to calculate total monthly views and write to rds
 # filter NAs from timestamp
@@ -119,3 +111,6 @@ names(average_views_monthly) <- languages
 for(i in 1:length(average_views_monthly)){
   names(average_views_monthly[[i]]) <- classes
 }
+
+# script for saving the updated views
+saveRDS(average_views_monthly, "daily_average_views_10-languages_updated.rds")
