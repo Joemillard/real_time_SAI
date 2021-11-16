@@ -5,8 +5,16 @@
 library(parallel)
 library(dplyr)
 
-# read in the rds for total monthly views
-average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/average_daily_views_random_10-languages.rds") # daily average views
+# read in the rds for average monthly views and for the updated data set
+average_daily_views <- readRDS("data/average_daily_views_random_10-languages.rds") # daily average views
+average_daily_views_updated <- readRDS("data/average_daily_views_random_10-languages_updated.rds") # daily average views updated
+
+# bind together the old and newer views
+average_daily_views_new <- list()
+
+for(i in 1:length(average_daily_views)){
+  average_daily_views[[i]] <- rbind(average_daily_views[[i]], average_daily_views_updated[[i]])
+}
 
 # set up vectors of wiki project class to remove any animal species from the random data
 wiki_proj <- paste(c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en"), "wiki", sep = "")
@@ -92,6 +100,6 @@ system.time({
 })
 
 
-saveRDS(random_trends, "outputs/random_trends.RDS")
+saveRDS(random_trends, "outputs/random_trends_updated.RDS")
 
 stopCluster(cl)
