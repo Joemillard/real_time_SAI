@@ -7,8 +7,18 @@ library(parallel)
 # set up cores for parallel processing
 cl <- makeCluster(detectCores())
 
-# read in the rds for total monthly views
-average_daily_views <- readRDS("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/average_views/average_daily_views_random_10-languages.rds") # daily average views
+# read in the rds for average monthly views and for the updated data set
+average_daily_views <- readRDS("data/daily_average_views_10-languages.rds") # daily average views
+average_daily_views_updated <- readRDS("data/daily_average_views_10-languages_updated.rds") # daily average views updated
+
+# bind together the old and newer views
+average_daily_views_new <- list(list())
+
+for(i in 1:length(average_daily_views)){
+  for(j in 1:length(average_daily_views[[i]])){
+    average_daily_views[[i]][[j]] <- rbind(average_daily_views[[i]][[j]], average_daily_views_updated[[i]][[j]])
+  }
+}
 
 # read in packages and data for each parallel session
 clusterEvalQ(cl, {
@@ -71,4 +81,4 @@ system.time({
     
 stopCluster(cl)
 
-saveRDS(SAI_trends, "outputs/species_trends.RDS")
+saveRDS(SAI_trends, "outputs/species_trends_updated.RDS")
