@@ -47,18 +47,21 @@ run_SAI_change <- function(views){
                                    names_from = c(year, month), 
                                    values_from = av_views, 
                                    id_cols=c(year, month, av_views, q_wikidata))
-  
+
   # remove any rows with NA and add 1 for following function
   views_wide <- views_wide[complete.cases(views_wide), ]
 
+
   # model each row with a GAM
   views_gammed <- gam_fn(views_wide)
+  
+
   
   # convert to rates of change
   # if you do not want to limit log rates of change to [-1,1] (LPI default) set limiter=FALSE
   views_lambdas_list <- species_lambdas_fn(views_gammed,
                                            limiter=TRUE)
-  
+
   # convert list of lambdas to data frame
   views_lambdas_dataframe <- do.call(rbind, views_lambdas_list)
   
@@ -78,7 +81,9 @@ system.time({
   
   }
 })
-    
+   
+test_dat <- run_SAI_change(average_daily_views[[1]][[1]])
+ 
 stopCluster(cl)
 
 saveRDS(SAI_trends, "outputs/species_trends_updated.RDS")
