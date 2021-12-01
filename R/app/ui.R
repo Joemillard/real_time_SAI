@@ -127,8 +127,7 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                                 h5("About the team")
                                                             )
                                                    ),
-                                                   #tags$p(h6(style="text-align: justify;", "The Species Awareness Index was originally conceived and created by Joe Millard, Robin Freeman, Richard Gregory, and Kate Jones (see the original publication", tags$a(href="https://doi.org/10.1111/cobi.13701", "here"),"). Since its initial publication the underlying code has been revised further by Joe Millard and Shawn Dove. The near real-time version hosted on this site was then built in collaboration with Robin Freeman, Thomas Frederick Johnson, and Richard Cornford.")),
-                                                   HTML("<p align='justify'> <h6>The Species Awareness Index was originally conceived and created by Joe Millard, Robin Freeman, Richard Gregory, and Kate Jones (see the original publication <a href = 'https://doi.org/10.1111/cobi.13701'> here</a>).</h6></p>"),
+                                                   div(style="text-align: justify", HTML("<p align='justify'> <h6>The Species Awareness Index was originally conceived and created by Joe Millard, Robin Freeman, Richard Gregory, and Kate Jones (see the original publication <a href = 'https://doi.org/10.1111/cobi.13701'> here</a>).</h6></p>")),
                                                    
                                                    fluidRow(
                                                      # Rob
@@ -218,8 +217,9 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                                   h5("Acknowledgements")
                                                              )
                                                    ),
-                                                   tags$p(h6(style="text-align: justify;", "We are very grateful to the following individuals and organisations who have worked with us and/or kindly shared their data:
-                                                             The Wikimedia Foundation, Yan Wong & James Rosindell (Onezoom), Tim Newbold, Dave Redding, and the UCL CBER Data Club.")),
+                                                   div(style="text-align: justify", HTML("<h6>We are very grateful to the following individuals and organisations who have worked with us and/or kindly shared their data:
+                                                             The Wikimedia Foundation, Yan Wong & James Rosindell (<a href = 'https://www.onezoom.org/'>Onezoom</a>), Tim Newbold, Dave Redding, and the UCL CBER Data Club.</h6></p>")),
+                                                   
                                                ) # Closes div panel
                                            ), # Closes column
                                            column(2)
