@@ -247,19 +247,17 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                   tabsetPanel(
                                     tabPanel("What is the SAI?", 
                                              fluidRow(style="text-align: center; margin: auto; width: 80%;",
-                                                      h3(strong("What does the Species Awareness Index (SAI) tell us?")),
+                                                      br(),
                                                       p(style="text-align: justify;", 
-                                                        "Some text"),        
-                                                      p(style="text-align: justify;", "More text")
+                                                        "The Species Awareness Index is a global metric of public biodiversity awareness, derived from the rate of change in page views for ~40,000 animal species on Wikipedia, across the 10 most popular Wikpedia languages (Arabic, Chinese, English, French, German, Italian, Japanese, Portuguese, Russian, and Spanish). Each species page is adjusted for the background change in popularity of the Wikipedia language in which it appears, meaning we can be more confident that change in awareness is not predicted by some background process on Wikipedia."),        
                                              )
                                     ),
                                     
                                     tabPanel("How is it calculated?", 
                                              fluidRow(style="text-align: center; margin: auto; width: 80%;",
-                                                      h3(strong("How is the SAI calculated?")),
+                                                      br(),
                                                       p(style="text-align: justify;", 
-                                                        "Some text"),        
-                                                      p(style="text-align: justify;", "More text")
+                                                        "The Species Awareness Index is calculated from the rate of change of species pages on Wikipedia, using the methdology applied in the Living Planet Index"),        
                                              )
                                     )
                                   )
