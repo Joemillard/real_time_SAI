@@ -106,10 +106,10 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                div(class="panel-body",  
                                                    tags$div( align = "center",
                                                              div( align = "center", 
-                                                                  h5("About the Data")
+                                                                  h5("About the Index")
                                                              )
                                                    ),
-                                                   tags$p(h6(style="text-align: justify;", "The Species Awareness Index is a global metric of public biodiversity awareness, derived from the rate of change in page views for ~40,000 animal species on Wikipedia, across the 10 most popular Wikpedia languages.
+                                                   tags$p(h6(style="text-align: justify;", "The Species Awareness Index is a global metric of public biodiversity awareness, derived from the rate of change in page views for ~40,000 animal species on Wikipedia, across the 10 most popular Wikpedia languages (Arabic, Chinese, English, French, German, Italian, Japanese, Portuguese, Russian, and Spanish).
                                                              Each species page is adjusted for the background change in popularity of the Wikipedia language in which it appears, meaning we can be more confident that change in awareness is not predicted by some background process on Wikipedia."))
                                                )
                                            )
@@ -127,8 +127,8 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                                 h5("About the team")
                                                             )
                                                    ),
-                                                   tags$p(h6(style="text-align: justify;", "The Species Awareness Index was originally conceived and created by Joe Millard, Robin Freeman, Richard Gregory, and Kate Jones (see the original publication here). 
-                                                             Since its initial publication, the underlying code has been revised further by Joe Millard and Shawn Dove. The near real-time version hosted on this site was then built in collaboration with Robin Freeman, Thomas Frederick Johnson, and Richard Cornford.")),
+                                                   #tags$p(h6(style="text-align: justify;", "The Species Awareness Index was originally conceived and created by Joe Millard, Robin Freeman, Richard Gregory, and Kate Jones (see the original publication", tags$a(href="https://doi.org/10.1111/cobi.13701", "here"),"). Since its initial publication the underlying code has been revised further by Joe Millard and Shawn Dove. The near real-time version hosted on this site was then built in collaboration with Robin Freeman, Thomas Frederick Johnson, and Richard Cornford.")),
+                                                   HTML("<p align='justify'> <h6>The Species Awareness Index was originally conceived and created by Joe Millard, Robin Freeman, Richard Gregory, and Kate Jones (see the original publication <a href = 'https://doi.org/10.1111/cobi.13701'> here</a>).</h6></p>"),
                                                    
                                                    fluidRow(
                                                      # Rob
