@@ -11,12 +11,9 @@ cl <- makeCluster(detectCores())
 average_daily_views <- readRDS("data/daily_average_views_10-languages.rds") # daily average views
 average_daily_views_updated <- readRDS("data/daily_average_views_10-languages_updated.rds") # daily average views updated
 
-# bind together the old and newer views
-average_daily_views_new <- list(list())
-
-for(i in 1:length(average_daily_views)){
-  for(j in 1:length(average_daily_views[[i]])){
-    average_daily_views[[i]][[j]] <- rbind(average_daily_views[[i]][[j]], average_daily_views_updated[[i]][[j]])
+for(i in 1:length(average_daily_views_new)){
+  for(j in 1:length(average_daily_views_new[[i]])){
+    average_daily_views_new[[i]][[j]] <- rbind(average_daily_views[[i]][[j]], average_daily_views_updated[[i]][[j]])
   }
 }
 
@@ -51,11 +48,8 @@ run_SAI_change <- function(views){
   # remove any rows with NA and add 1 for following function
   views_wide <- views_wide[complete.cases(views_wide), ]
 
-
   # model each row with a GAM
   views_gammed <- gam_fn(views_wide)
-  
-
   
   # convert to rates of change
   # if you do not want to limit log rates of change to [-1,1] (LPI default) set limiter=FALSE
