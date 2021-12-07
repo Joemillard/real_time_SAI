@@ -58,6 +58,9 @@ gam_fn <- function(new.pop_data) {
       
     } else {
       
+      # create zero_adjust value of 0 for later use
+      zero_adjust <- 0
+      
       # add log column
       pop_data$log_popvalue = log(pop_data$count)
       
