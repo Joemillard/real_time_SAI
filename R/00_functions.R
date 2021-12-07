@@ -88,8 +88,8 @@ gam_fn <- function(new.pop_data) {
       # if GAM fails the quality check ...
     } else {
       
-      # copy the original data
-      gam_poplist[[counter]] <- new.pop_data[counter,2:ncol(new.pop_data)]
+      # copy the original data with zero adjustment
+      gam_poplist[[counter]] <- new.pop_data[counter,2:ncol(new.pop_data)] + zero_adjust
       
       # increment counter
       counter <- counter + 1
