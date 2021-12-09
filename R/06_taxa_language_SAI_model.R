@@ -11,30 +11,29 @@ source("R/00_functions.R")
 
 # script for pollinator models using new language data
 # read in the random rds file
-species_trends <- readRDS(here::here("outputs/species_trends.rds"))
-
-# set up vector of column names
-date_vec <- c(colnames(species_trends[[1]][[1]][,3:58]), "2020_03")
+species_trends_updated <- readRDS(here::here("outputs/species_trends_updated_2.rds"))
 
 # add initial value of 1 to each species page
-for(i in 1:length(species_trends)){
-  for(j in 1:length(species_trends[[i]])){
-    species_trends[[i]][[j]] <- data.frame(append(species_trends[[i]][[j]], list(X2015_07 = 1), after = match("SpecID", names(species_trends[[i]][[j]]))))
-    colnames(species_trends[[i]][[j]]) <- c("q_wikidata", "SpecID", date_vec)
+for(i in 1:length(species_trends_updated)){
+  for(j in 1:length(species_trends_updated[[i]])){
+    species_trends_updated[[i]][[j]] <- data.frame(append(species_trends_updated[[i]][[j]], list(X2015_07 = 1), after = match("q_wikidata", names(species_trends_updated[[i]][[j]]))))
   }
 }
+
+# set up vector of column names
+date_vec <- c(colnames(species_trends_updated[[1]][[1]])[2:76])
 
 # read in the string of languages - original order sorted alphabetically for files read in
 languages <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
 
 # read in the lambda files 
-random_trend <- readRDS(here::here("outputs/overall_random.rds"))
+random_trend <- readRDS(here::here("outputs/overall_random_updated_2.rds"))
 
 # adjust each of the lambda values for random
 # adjust the year column
 for(i in 1:length(random_trend)){
   random_trend[[i]]$language <- languages[i]
-  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:57])))
+  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:75])))
 }
 
 # bind together and plot the random trends
@@ -56,10 +55,10 @@ classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "repti
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()
 all_lambdas <- list()
-for(i in 1:length(species_trends)){
-  for(j in 1:length(species_trends[[i]])){
-    data_file <- species_trends[[i]][[j]]
-    adj_lambdas[[j]] <- cbind(data_file[, 1:2], sweep(data_file[, 3:ncol(data_file)], 2, random_trend[[i]]$lamda, FUN = "-"))
+for(i in 1:length(species_trends_updated)){
+  for(j in 1:length(species_trends_updated[[i]])){
+    data_file <- species_trends_updated[[i]][[j]]
+    adj_lambdas[[j]] <- cbind(data_file[, 1], sweep(data_file[, 2:ncol(data_file)], 2, random_trend[[i]]$lamda, FUN = "-"))
   }
   all_lambdas[[i]] <- adj_lambdas
 }
@@ -94,17 +93,17 @@ smooth_all_groups <- function(data_file){
   
   # smooth the series for each row (species)
   for(i in 1:nrow(data_file)){
-    smoothed_indices[[i]] <- smooth_series(X = as.numeric(as.vector(data_file[i, 4:ncol(data_file)])))
+    smoothed_indices[[i]] <- smooth_series(X = as.numeric(as.vector(data_file[i, 3:ncol(data_file)])))
     smoothed_indices[[i]] <- create_lambda(smoothed_indices[[i]])
   }
   
   smoothed_lambda <- as.data.frame(do.call(rbind, smoothed_indices))
   
   # add back in the original column names
-  colnames(smoothed_lambda) <- colnames(data_file)[3:ncol(data_file)]
+  colnames(smoothed_lambda) <- colnames(data_file)[2:ncol(data_file)]
   
   # bind the adjusted smoothed lambda back onto the first four columns and correct year
-  smoothed_lambda <- cbind(data_file[,1:2], smoothed_lambda)
+  smoothed_lambda <- cbind(data_file[,1], smoothed_lambda)
   
   return(smoothed_lambda)
   
@@ -133,7 +132,7 @@ average_lambda <- function(data_file, taxa, series_start, series_end){
 
 # calculate the average lambda and add language/class columns, just for complete years
 series_start <- c("2016_01")
-series_end <- c("2020_01")
+series_end <- c("2021_01")
 
 # calculate the average lambda and add language/class columns
 avg_lambdas <- list()
@@ -159,7 +158,7 @@ for(i in 1:length(avg_lambdas)){
 final_bound <- rbindlist(final_bound) %>%
   mutate(taxa = factor(taxa)) %>%
   mutate(language = factor(language)) %>%
-  mutate(q_wikidata = factor(q_wikidata))
+  rename("q_wikidata" = "data_file[, 1]")
 
 ## approach using language and class as fixed effects
 model_3 <- lm(av_lambda ~ taxa * language, data = final_bound)
@@ -186,4 +185,4 @@ class_language_models <- fin_frame_6 %>%
   mutate(taxa = fct_reorder(taxa, -predicted_values, median)) %>%
   mutate(language = fct_reorder(language, -predicted_values, median))
 
-saveRDS(class_language_models, "class_language_change.rds")
+saveRDS(class_language_models, "outputs/shiny_outputs/class_language_change_2.rds")
