@@ -3,6 +3,7 @@
 
 # for parallel session
 library(parallel)
+library(dplyr)
 
 # set up cores for parallel processing
 cl <- makeCluster(detectCores())
@@ -10,6 +11,8 @@ cl <- makeCluster(detectCores())
 # read in the rds for average monthly views and for the updated data set
 average_daily_views <- readRDS("data/daily_average_views_10-languages.rds") # daily average views
 average_daily_views_updated <- readRDS("data/daily_average_views_10-languages_updated.rds") # daily average views updated
+
+average_daily_views_new <- average_daily_views
 
 for(i in 1:length(average_daily_views_new)){
   for(j in 1:length(average_daily_views_new[[i]])){
@@ -65,19 +68,19 @@ run_SAI_change <- function(views){
 
 SAI_trends <- list()
 
-# iterate througheach class/lamgauge combo
+# iterate through each class/lamgauge combo
 system.time({
   for(i in 1:length(average_daily_views)){
   
-    SAI_trends[[i]] <- parLapply(cl, average_daily_views[[i]], fun = run_SAI_change)
+    SAI_trends[[i]] <- parLapply(cl, average_daily_views_new[[i]], fun = run_SAI_change)
     
     print(i)
   
   }
 })
-   
+  
 test_dat <- run_SAI_change(average_daily_views[[1]][[1]])
  
 stopCluster(cl)
 
-saveRDS(SAI_trends, "outputs/species_trends_updated.RDS")
+saveRDS(SAI_trends, "outputs/species_trends_updated_2.rds")
