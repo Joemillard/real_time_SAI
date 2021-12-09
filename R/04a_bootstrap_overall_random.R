@@ -6,15 +6,15 @@ library(boot)
 library(ggplot2)
 
 # read in the random view trends
-language_views <- readRDS(here::here("outputs/random_trends.rds"))
+language_views <- readRDS(here::here("outputs/random_trends_updated.rds"))
 
 # add initial value of 1 to each random page
 for(i in 1:length(language_views)){
-  language_views[[i]] <- data.frame(append(language_views[[i]], list(start = 1), after = match("SpecID", names(language_views[[i]]))))
+  language_views[[i]] <- data.frame(append(language_views[[i]], list(X2015_07 = 1), after = match("q_wikidata", names(language_views[[i]]))))
 }
 
 # set up vector of column names
-date_vec <- c("X2015_07", colnames(language_views[[1]][,4:59]))
+date_vec <- c(colnames(language_views[[1]][,2:76]))
 
 # set up language vector
 language_vec <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
@@ -26,7 +26,7 @@ create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
   lambdas_new <- lambdas[complete.cases(lambdas), ]
   
   # select columns from lambda file to calculate mean, and build a cumprod trend
-  lambda_data <- lambdas_new[, 4:ncol(lambdas_new)]
+  lambda_data <- lambdas_new[, 3:ncol(lambdas_new)]
   this_lambdas <- lambda_data[ind, ]
   mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
   trend <- cumprod(10^c(0, mean_ann_lambda))
@@ -62,4 +62,4 @@ for(i in 1:length(language_views)){
 }
 
 # resave the average lambda for random views, according to bootstrap method used throughout
-saveRDS(lpi_trends_adjusted, "outputs/overall_random.rds")
+saveRDS(lpi_trends_adjusted, "outputs/overall_random_updated_2.rds")

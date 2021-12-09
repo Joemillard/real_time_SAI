@@ -10,10 +10,10 @@ average_daily_views <- readRDS("data/average_daily_views_random_10-languages.rds
 average_daily_views_updated <- readRDS("data/average_daily_views_random_10-languages_updated.rds") # daily average views updated
 
 # bind together the old and newer views
-average_daily_views_new <- list()
+average_daily_views_new <- average_daily_views
 
-for(i in 1:length(average_daily_views)){
-  average_daily_views[[i]] <- rbind(average_daily_views[[i]], average_daily_views_updated[[i]])
+for(i in 1:length(average_daily_views_new)){
+  average_daily_views_new[[i]] <- rbind(average_daily_views[[i]], average_daily_views_updated[[i]])
 }
 
 # set up vectors of wiki project class to remove any animal species from the random data
@@ -96,10 +96,10 @@ run_SAI_change <- function(views){
 
 # iterate through each class/langauge combo
 system.time({
-  random_trends <- parLapply(cl, average_daily_views, fun = run_SAI_change)
+  random_trends <- parLapply(cl, average_daily_views_new, fun = run_SAI_change)
 })
 
 
-saveRDS(random_trends, "outputs/random_trends_updated.RDS")
+saveRDS(random_trends, "outputs/random_trends_updated.rds")
 
 stopCluster(cl)
