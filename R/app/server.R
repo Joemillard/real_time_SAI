@@ -3,12 +3,26 @@ server <- function(input, output) {
   
   library(ggplot2)
   library(dplyr)
+  library(aws.s3)
   
-  # each of these csv reads needd to be replaced by an API call to pull in the formatted data from the PostgreSQL server
-  class_language <- readRDS("class_language_2.rds")
-  class_language_change <- readRDS("class_language_change_2.rds")
-  class_SAI <- readRDS("class_trend_2.rds")
-  overall_SAI <- readRDS("overall_2.rds")
+  # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
+  s3BucketName <- "speciesawarenessindex"
+  
+  # read in each of the secret keys hosted online
+  AWS_ACCESS_KEY_ID <- read.table("AWS_ACCESS_KEY_ID.txt")
+  AWS_SECRET_ACCESS_KEY <- read.table("AWS_SECRET_ACCESS_KEY.txt")
+  AWS_DEFAULT_REGION <- read.table("AWS_DEFAULT_REGION.txt")
+  
+  # set system environment for each of AWS keys
+  Sys.setenv("AWS_ACCESS_KEY_ID" = AWS_ACCESS_KEY_ID,
+              "AWS_SECRET_ACCESS_KEY" = AWS_SECRET_ACCESS_KEY,
+              "AWS_DEFAULT_REGION" = AWS_DEFAULT_REGION)
+  
+  # read in each of the rds files from AWS
+  class_language <- s3read_using(FUN = readRDS, bucket = s3BucketName, object = "class_language_2.rds")
+  class_language_change <- s3read_using(FUN = readRDS, bucket = s3BucketName, object = "class_language_change_2.rds")
+  class_SAI <- s3read_using(FUN = readRDS, bucket = s3BucketName, object = "class_trend_2.rds")
+  overall_SAI <- s3read_using(FUN = readRDS, bucket = s3BucketName, object = "overall_2.rds")
   
   # need to make requests of our SAI API here, which pulls in a set of dataframes:
   # overall_SAI, class_SAI, class_language_SAI, class_language_change
