@@ -4,6 +4,7 @@ server <- function(input, output) {
   library(ggplot2)
   library(dplyr)
   
+  # each of these csv reads needd to be replaced by an API call to pull in the formatted data from the PostgreSQL server
   class_language <- readRDS("class_language_2.rds")
   class_language_change <- readRDS("class_language_change_2.rds")
   class_SAI <- readRDS("class_trend_2.rds")
@@ -103,4 +104,42 @@ server <- function(input, output) {
     
   })
   
+  ### RC 20220411
+  ## Server code to execute dl for each button/data frame
+  output$class_language_dl <- downloadHandler(
+    filename = function(){
+      paste("class_language_SAI_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
+    },
+    content = function(file){
+      write.csv(class_language, file, row.names = F)
+    }
+  )
+  
+  output$class_language_change_dl <- downloadHandler(
+    filename = function(){
+      paste("class_language_change_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
+    },
+    content = function(file){
+      write.csv(class_language_change, file, row.names = F)
+    }
+  )
+  
+  output$class_SAI_dl <- downloadHandler(
+    filename = function(){
+      paste("class_SAI_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
+    },
+    content = function(file){
+      write.csv(class_SAI, file, row.names = F)
+    }
+  )
+  
+  output$overall_SAI_dl <- downloadHandler(
+    filename = function(){
+      paste("overall_SAI_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
+    },
+    content = function(file){
+      write.csv(overall_SAI, file, row.names = F)
+    }
+  )
+  ###
 }
