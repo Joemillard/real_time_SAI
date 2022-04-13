@@ -1,3 +1,11 @@
+#!/usr/bin/env Rscript
+
+# set extra library path fro when running from Python
+.libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
+
+# set working directory for base corr
+working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+
 # potentially add script to separate between smoothed and non-smoothed lambdas
 # read in required packages
 library(data.table)
@@ -7,12 +15,11 @@ library(boot)
 library(forcats)
 
 # source the functions R script
-source("R/00_functions.R")
+source(paste(working_dir, "R/00_functions.R", sep = ""))
 
 # script for pollinator models using new language data
 # read in the random rds file
-species_trends_updated <- readRDS(here::here("outputs/species_trends_updated_2.rds"))
-#species_trends <- readRDS(here::here("outputs/species_trends.rds"))
+species_trends_updated <- readRDS(paste(working_dir, "outputs/species_trends_updated_2.rds", sep = ""))
 
 # add initial value of 1 to each species page
 for(i in 1:length(species_trends_updated)){
@@ -28,7 +35,7 @@ date_vec <- c(colnames(species_trends_updated[[1]][[1]])[2:76])
 languages <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
 
 # read in the lambda files 
-random_trend <- readRDS(here::here("outputs/overall_random_updated_2.rds"))
+random_trend <- readRDS(paste(working_dir, "outputs/overall_random_updated_2.rds", sep = ""))
 
 # adjust each of the lambda values for random
 # adjust the year column
@@ -36,19 +43,6 @@ for(i in 1:length(random_trend)){
   random_trend[[i]]$language <- languages[i]
   random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:75])))
 }
-
-# bind together and plot the random trends
-random_trend_figure <- rbindlist(random_trend) %>%
-  mutate(language = factor(language, levels = c("ar", "fr", "zh", "en", "de", "es", "it", "ja", "pt" , "ru"),
-                           labels = c("Arabic", "French", "Chinese", "English", "German", "Spanish", "Italian", "Japanese", "Portuguese", "Russian"))) %>%
-  ggplot() +
-  geom_hline(yintercept = 1, linetype = "dashed", size = 1) +
-  geom_line(aes(x = Year, y = LPI_final, group = language)) +
-  geom_ribbon(aes(x = Year, ymin = CI_low, ymax = CI_high, group = language), alpha = 0.3) +
-  scale_y_continuous("Random index", breaks = c(0.6, 1, 1.4, 1.8)) +
-  facet_wrap(~language) +
-  theme_bw() +
-  theme(panel.grid = element_blank())
 
 # string for pollinating classes, plus random
 classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
@@ -182,4 +176,4 @@ class_language <- fin_bound_trends %>%
                            labels = c("Arabic", "Chinese", "English", "French", "German", "Italian", "Japanese", "Portuguese", "Russian", "Spanish")))
 
 # save file for Shiny app - this file needs to be written SQL database
-saveRDS(class_language, "outputs/shiny_outputs/class_language_2.rds")
+saveRDS(class_language, paste(working_dir, "outputs/shiny_outputs/class_language_2.rds", sep = ""))

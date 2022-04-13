@@ -71,4 +71,4 @@ for(i in 1:length(language_views)){
 }
 
 # resave the average lambda for random views, according to bootstrap method used throughout
-saveRDS(lpi_trends_adjusted, paste(working_dir, "outputs/overall_random_updated_2.rds"))
+saveRDS(lpi_trends_adjusted, paste(working_dir, "outputs/overall_random_updated_2.rds", sep = ""))

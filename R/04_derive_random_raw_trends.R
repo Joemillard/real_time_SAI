@@ -113,6 +113,6 @@ system.time({
   random_trends <- parLapply(cl, average_daily_views_new, fun = run_SAI_change)
 })
 
-saveRDS(random_trends, paste(working_dir, "outputs/random_trends_updated.rds",sep = ""))
+saveRDS(random_trends, paste(working_dir, "outputs/random_trends_updated.rds", sep = ""))
 
 stopCluster(cl)
