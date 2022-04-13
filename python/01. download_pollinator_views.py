@@ -5,131 +5,282 @@ import time
 import pandas as pd
 import numpy as np
 from pandas.io.json import json_normalize
+import datetime
+from datetime import date
+from subprocess import Popen, PIPE
 
-# Get session for url query
-S = requests.Session()
 
-headers = {"User-Agent": "species_awareness_index/0.0 (https://joemillard.github.io/; joseph.millard@sociology.ox.ac.uk) generic-library/0.0"}
+if __name__ == "__main__":
+	###
+	# SET UP
 
-#User-Agent: 
+	# set parameters for random pages and sleep
+	no_pages = 11000
+	sleep_period = 0.15
 
-print(S)
+	# languages for views
+	languages = ['en', 'zh', 'fr', 'de', 'es', 'ru', 'pt', 'it', 'ar', 'ja']
 
-# read in the list of pages
-pages = pd.read_csv('C:/Users/joeym/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/wikipedia_target-1-metric/data/all_iucn_titles.csv') # home PC
-# pages = pd.read_csv('J:/submission_2/all_iucn_titles.csv') # CBER PC
+	#taxa of interest
+	taxa_ls = ['ACTINOPTERYGII', 'AMPHIBIA', 'AVES', 'INSECTA', 'MAMMALIA', 'REPTILIA']
 
-# read in the random pages
-random_pages = pd.read_csv('C:/Users/joeym/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/wikipedia_target-1-metric/data/random_pages_11000.csv') # home PC - # CBER PC (5500 pages from here), because UCL PC shut down
-# random_pages = pd.read_csv('J:/submission_2/random_pages.csv') # CBER PC (6000 pages from here)
+	# Load and prepare page info
+	### EDIT FILEPATH
+	pages = pd.read_csv("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/class_wiki_indices/submission_2/all_iucn_titles.csv")
 
-# languages for views
-languages = ['en', 'zh', 'fr', 'de', 'es', 'ru', 'pt', 'it', 'ar', 'ja']
+	# only if site in languages + 'wiki'
+	wiki_langs = [lang + "wiki" for lang in languages] 
 
-# set parameters for random pages and sleep
-no_pages = 11000
-sleep_period = 0.5
+	pages = pages.loc[pages.site.isin(wiki_langs) , ]
+	pages = pages.drop_duplicates(subset = ["q_wikidata", "site"]).reset_index(drop = True)
 
-# define function for subsetting the random dataframe
-def build_rand(view_pages, no_pages):
-    pages = pd.DataFrame(view_pages)
-    pages = pages[['wiki_title', 'wiki_id']]
-    pages = pages.rename(columns = {'wiki_title':'title', 'wiki_id':'q_wikidata'})
-    pages = pages.drop_duplicates(subset = "title")
-    pages = pages.head(no_pages) #  add to subset for smaller sample
-    pages.index = range(len(pages.index))
-    return(pages)
+	pages["wiki_lang"] = pages.site.str.replace("wiki", "")
 
-def build_taxa(data, no_pages):
-    data = pd.DataFrame(data)
-    taxa = data[['title', 'q_wikidata']]
-    taxa = taxa.drop_duplicates(subset = "q_wikidata")
-    # taxa = taxa.head(no_pages) # add to subset pages for smaller sample
-    taxa.index = range(len(taxa.index))
-    return(taxa)
+	# Get dates of views needed 
+	today = date.today()
+	today_f = today.strftime("%Y%m%d")
 
-# split the pages up into the top 10 languages
-for l in range(0, len(languages)):
+	yday = today - datetime.timedelta(days=1)
+	yday_f = yday.strftime("%Y%m%d")
 
-    # print the current language
-    print(languages[l])
+	last_month_end = today.replace(day=1) - datetime.timedelta(days=1)
+	last_month_strt = last_month_end.replace(day=1)
 
-    # filter for each language
-    language_pages = pages[pages.site == (languages[l] + 'wiki')]
-    language_random = random_pages[random_pages.language == languages[l]]
+	last_month_end_f = last_month_end.strftime("%Y%m%d")
+	last_month_strt_f = last_month_strt.strftime("%Y%m%d")
 
-    # split the pages up into each class of interest
-    actinopterygii = language_pages[language_pages.class_name == 'ACTINOPTERYGII']
-    amphibia = language_pages[language_pages.class_name =='AMPHIBIA']
-    aves = language_pages[language_pages.class_name == 'AVES']
-    insecta = language_pages[language_pages.class_name == 'INSECTA']
-    mammalia = language_pages[language_pages.class_name == 'MAMMALIA']
-    reptilia = language_pages[language_pages.class_name == 'REPTILIA']
+	# # Load current sai
+	### EDIT FILEPATH
+	overall_SAI = pd.read_csv("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/overall_SAI_2022_04_11.csv")
+	overall_SAI.Year[1]
+	overall_SAI["Year_alt"] = overall_SAI.Year.replace("-", "", regex=True).astype(int)     
 
-    # filter for just the article paegs to search for views
-    actinopterygii_pages = build_taxa(actinopterygii, no_pages)
-    amphibia_pages = build_taxa(amphibia, no_pages)
-    aves_pages = build_taxa(aves, no_pages)
-    insecta_pages = build_taxa(insecta, no_pages)
-    mammalia_pages = build_taxa(mammalia, no_pages)
-    reptilia_pages = build_taxa(reptilia, no_pages)
-    language_random = build_rand(language_random, no_pages)
+	# Get last month of data
+	dt_last = datetime.datetime.strptime(str(max(overall_SAI.Year_alt)), "%Y%m%d")
 
-    # create list of each taxa object, with string corresponding at each index
-    taxa = [actinopterygii_pages, amphibia_pages, aves_pages, insecta_pages, mammalia_pages, reptilia_pages, language_random]
-    taxa_strings = ["actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random"]
+	# Get first day of next month...
+	dt_next = (dt_last.replace(day=1) + datetime.timedelta(days=32)).replace(day=1)
 
-    # iterate through each taxa/random object, set up empty list, and then iterate each taxa object each article
-    for j in range(0, len(taxa)):
+	dt_next_f = dt_next.strftime("%Y%m%d")
 
-        # print the current taxonomic order
-        print(taxa_strings[j])
+	## verify last month in sai data download matches last month based on current data
+	##
+	# if last_month_strt == dt_next:
+		# last_month_strt = last_month_strt
 
-        # write to result object
-        result = []
+	# if not a match, get all data ince last sai download
+	if last_month_strt != dt_next:
+		last_month_strt_f = dt_next_f
 
-        # for each title, grab views from API
-        for i in range(0, len(taxa[j]['title'])):
+	###
+		
+	### Main Code
 
-            # add counter for multiples of 100
-            if i % 100 == 0:
-                print(i)
-            try:
-                # assign title at iteration to object, replace spaces, and retrieve views for URL
-                title = taxa[j]['title'][i]
-                title = title.replace(" ", "_")
-                URL = "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/%s.wikipedia.org/all-access/user/%s/daily/20200401/20210930" % (languages[l], title)
-                R = S.get(url = URL, headers = headers)
+	# Get session for url query
+	S = requests.Session()
 
-                # clean up json file, append column for taxa object, and append to results[]
-                DATA = R.json()
-                DATA = DATA['items']
-                DATA = json_normalize(DATA)
-                DATA['q_wikidata'] = taxa[j]['q_wikidata'][i]
-                result.append(DATA)
-                time.sleep(sleep_period)
+	headers = {"User-Agent": "species_awareness_index/0.0 (https://joemillard.github.io/; joseph.millard@nhm.ac.uk) generic-library/0.0"}
 
-            # in event of error retrieving views, insert row with article title
-            except KeyError:
-            
-                df = pd.DataFrame({'':[''],'access':[''], 'agent':[''], 'title':[title], 'granularity':[''], 'project':[''],'timestamp':[''], 'views':['NA'], 'q_wikidata':[taxa[j]['q_wikidata'][i]]})
-                result.append(df)
-                # write error row to file and don't append
-                print(i, j, "error")
+	for lang in languages:
+		print(lang)
+		for taxa in taxa_ls:
+			print(taxa)
+			pages_tmp = pages.loc[(pages.wiki_lang == lang) &
+										(pages.class_name == taxa ),].reset_index(drop = True)
+			taxa_string = taxa.lower()
 
-            # in event that blocked from api, insert error row and wait for 5 minutes before reconnecting
-            except IOError:
-                
-                df = pd.DataFrame({'':[''],'access':[''], 'agent':[''], 'title':[title], 'granularity':[''], 'project':[''],'timestamp':[''], 'views':['connect_fail'], 'q_wikidata':[taxa[j]['q_wikidata'][i]]})
-                result.append(df)
-                # write error row to file and don't append
-                print(i, j, "connect_fail")
-                time.sleep(300)
+			# write to result object
+			result = []
+			# actual code...
+			for i in range(0, pages_tmp.shape[0]):
+			#     print(i)
+			# testing
+			# for i in range(0, 1000):
+				# print(i)
+				# add counter for multiples of 100
+				if i% 100 == 0:
+				     print(i)
+				try:
+					# assign title at iteration to object, replace spaces, and retrieve views for URL
+					title = pages_tmp.title[i]#taxa[j]['title'][i]
+					title = title.replace(" ", "_")
+					tmp_q_wiki = pages_tmp.q_wikidata[i] 
+					
+					# all needed data to end of previous month
+					URL = "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/%s.wikipedia.org/all-access/user/%s/daily/%s/%s" % (lang, title, last_month_strt_f, last_month_end_f)
 
-        # concatenate all appended results to dataframe and write to csv for each subset
-        final = pd.concat(result)
-        taxa_level = taxa_strings[j]
-        save_loc = 'D:/wikipedia_views/user_trends/trends_updated/%s%s_user_trends_updated.csv' % ((languages[l] + '_'), (taxa_level + '_')) # Home PC
-        # save_loc = ('C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/class_wiki_indices/submission_2/user_trends/%s%s_user_trends.csv') % ((languages[l] + '_'), (taxa_level + '_')) # CBER PC
-        final.to_csv(save_loc, sep = ',', encoding = 'utf-8-sig')
-    
+					R = S.get(url = URL, headers = headers)
+					# Check R status code
+					# R.status_code
+					# R.ok (ie., is status_code < 400)
+
+					# clean up json file, append column for taxa object, and append to results[]
+					DATA = R.json()
+					DATA = DATA['items']
+					DATA = json_normalize(DATA)
+					DATA['q_wikidata'] = tmp_q_wiki #taxa[j]['q_wikidata'][i]
+
+					## summarise by month and q_wikidata
+					# first, extract month and year from timestamp
+					DATA["dt_obj"] = pd.to_datetime(arg = DATA.timestamp, format = "%Y%m%d%H")
+					DATA["year"] = DATA.dt_obj.dt.year
+					DATA["month"] = DATA.dt_obj.dt.month
+
+					# DATA_summ = DATA.groupby(['article', 'year', 'month', 'q_wikidata'], as_index=False).agg({"views" : "mean"})
+					DATA_summ = DATA.groupby(['article', 'year', 'month', 'q_wikidata'])['views'].agg(['mean']).rename(columns={'mean': 'av_views'}).reset_index()
+
+					# test with NA...
+					# DATA_na = DATA.copy()
+					# DATA_na.views[0] = np.nan
+					# DATA_na.groupby(['article', 'year', 'month', 'q_wikidata'])['views'].agg(['mean']).rename(columns={'mean': 'av_views'}).reset_index()
+					# NA are removed by default...
+
+					# DATA.group
+					result.append(DATA_summ)
+
+					time.sleep(sleep_period)
+
+				# in event of error retrieving views, insert row with article title
+				except KeyError:
+
+					df = pd.DataFrame({'article'     : [title], 
+										'year'       : [''], 
+										'month'      : [''], 
+										'q_wikidata' : [tmp_q_wiki],
+										'av_views'   : [np.nan]})
+					# df = pd.DataFrame({'':[''],'access':[''], 'agent':[''], 'title':[title], 'granularity':[''], 'project':[''],'timestamp':[''], 'views':[np.nan], 'q_wikidata':[tmp_q_wiki]})
+					result.append(df)
+					# write error row to file and don't append
+					print(title, "error")
+
+				# in event that blocked from api, insert error row and wait for 5 minutes before reconnecting
+				except IOError:
+					# hmmm should retry here!!
+					# wait 5 minutes...
+					time.sleep(300)
+
+					# then retry
+					try:
+						# assign title at iteration to object, replace spaces, and retrieve views for URL
+						# title = pages_tmp.title[i]#taxa[j]['title'][i]
+						# title = title.replace(" ", "_")
+						# tmp_q_wiki = pages_tmp.q_wikidata[i] 
+						
+						# # all needed data to end of previous month
+						# URL = "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/%s.wikipedia.org/all-access/user/%s/daily/%s/%s" % (lang, title, last_month_strt_f, last_month_end_f)
+
+						R = S.get(url = URL, headers = headers)
+						# Check R status code
+						# R.status_code
+						# R.ok (ie., is status_code < 400)
+
+						# clean up json file, append column for taxa object, and append to results[]
+						DATA = R.json()
+						DATA = DATA['items']
+						DATA = json_normalize(DATA)
+						DATA['q_wikidata'] = tmp_q_wiki #taxa[j]['q_wikidata'][i]
+
+						## summarise by month and q_wikidata
+						DATA["dt_obj"] = pd.to_datetime(arg = DATA.timestamp, format = "%Y%m%d%H")
+						DATA["year"] = DATA.dt_obj.dt.year
+						DATA["month"] = DATA.dt_obj.dt.month
+
+						# DATA_summ = DATA.groupby(['article', 'year', 'month', 'q_wikidata'], as_index=False).agg({"views" : "mean"})
+						DATA_summ = DATA.groupby(['article', 'year', 'month', 'q_wikidata'])['views'].agg(['mean']).rename(columns={'mean': 'av_views'}).reset_index()
+						
+						result.append(DATA_summ)
+
+						time.sleep(sleep_period)
+
+					# in event of error retrieving views, insert row with article title
+					except KeyError:
+
+						df = pd.DataFrame({'article'     : [title], 
+											'year'       : [''], 
+											'month'      : [''], 
+											'q_wikidata' : [tmp_q_wiki],
+											'av_views'   : [np.nan]})
+						# df = pd.DataFrame({'':[''],'access':[''], 'agent':[''], 'title':[title], 'granularity':[''], 'project':[''],'timestamp':[''], 'views':[np.nan], 'q_wikidata':[tmp_q_wiki]})
+						result.append(df)
+						# write error row to file and don't append
+						print(title, "error")
+
+					# in event that blocked from api, insert error row and wait for 5 minutes before reconnecting
+					except IOError:
+						# only if 2 connection errors dow we skip row...
+						df = pd.DataFrame({'article'     : [title], 
+											'year'       : [''], 
+											'month'      : [''], 
+											'q_wikidata' : [tmp_q_wiki],
+											'av_views'   : [np.nan]})
+						# df = pd.DataFrame({'':[''],'access':[''], 'agent':[''], 'title':[title], 'granularity':[''], 'project':[''],'timestamp':[''], 'views':['connect_fail'], 'q_wikidata':[tmp_q_wiki]})
+						result.append(df)
+						# write error row to file and don't append
+						print(title, "connect_fail")
+						time.sleep(300)
+
+					
+			# concatenate all appended results to dataframe and write to csv for each subset
+			final = pd.concat(result).reset_index(drop = True)
+			# taxa_level = taxa_string #s[j]
+			### EDIT FILEPATH
+			save_loc = 'D:/wikipedia_views/%s_%s_user_trends_%s_%s.csv' % (lang, taxa_string, last_month_strt_f, last_month_end_f) # Home PC
+			# print(save_loc)
+			# save_loc = ('C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/class_wiki_indices/submission_2/user_trends/%s%s_user_trends.csv') % ((languages[l] + '_'), (taxa_level + '_')) # CBER PC
+			final.to_csv(save_loc, sep = ',', encoding = 'utf-8-sig')
+
+# run command for calling R from Python, with error capture -- 03_derive_species_raw_trends.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/03_derive_species_raw_trends.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 04_derive_random_raw_trends.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04_derive_random_raw_trends.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 04a_bootstrap_overall_random.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04a_bootstrap_overall_random.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 05_class_language_SAI.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/05_class_language_SAI.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 06_taxa_language_SAI_model.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/06_taxa_language_SAI_model.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error)) 
+
+# run command for calling R from Python, with error capture -- 07_class_SAI.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/07_class_SAI.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 08_overall_SAI.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/08_overall_SAI.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
