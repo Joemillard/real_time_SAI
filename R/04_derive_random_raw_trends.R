@@ -1,12 +1,17 @@
+#!/usr/bin/env Rscript
+
 ## script for calculating the trend for each language, adjusted for random, and then aggregated for all languages
 # will need to initially weight all classes equally in in the infile, and then weight by relative species richness of each class
+
+# set extra library path fro when running from Python
+.libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
 
 # for parallel session
 library(parallel)
 library(dplyr)
 
+# set working directory for base corr
 working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
-
 
 # read in the rds for average monthly views and for the updated data set
 average_daily_views <- readRDS(paste(working_dir, "data/average_daily_views_random_10-languages.rds", sep = "")) # daily average views
@@ -53,6 +58,12 @@ cl <- makeCluster(detectCores())
 
 # read in packages and data for each parallel session
 clusterEvalQ(cl, {
+  
+  # set extra library path fro when running from Python
+  .libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
+  
+  # set working directory for base corr
+  working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
   
   # set up the packages required
   library(dplyr)
@@ -101,7 +112,6 @@ run_SAI_change <- function(views){
 system.time({
   random_trends <- parLapply(cl, average_daily_views_new, fun = run_SAI_change)
 })
-
 
 saveRDS(random_trends, paste(working_dir, "outputs/random_trends_updated.rds",sep = ""))
 

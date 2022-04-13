@@ -1,12 +1,21 @@
+#!/usr/bin/env Rscript
+
 # bootstrap the overall random trend
 
+# set extra library path fro when running from Python
+.libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
+
+# read in packages
 library(dplyr)
 library(data.table)
 library(boot)
 library(ggplot2)
 
+# set working directory for base corr
+working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+
 # read in the random view trends
-language_views <- readRDS(here::here("outputs/random_trends_updated.rds"))
+language_views <- readRDS(paste(working_dir, "outputs/random_trends_updated.rds", sep = ""))
 
 # add initial value of 1 to each random page
 for(i in 1:length(language_views)){
@@ -62,4 +71,4 @@ for(i in 1:length(language_views)){
 }
 
 # resave the average lambda for random views, according to bootstrap method used throughout
-saveRDS(lpi_trends_adjusted, "outputs/overall_random_updated_2.rds")
+saveRDS(lpi_trends_adjusted, paste(working_dir, "outputs/overall_random_updated_2.rds"))
