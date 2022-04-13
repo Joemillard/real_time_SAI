@@ -1,4 +1,7 @@
 # potentially add script to separate between smoothed and non-smoothed lambdas
+# set extra library path fro when running from Python
+.libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
+
 # read in required packages
 library(data.table)
 library(dplyr)

@@ -80,9 +80,6 @@ run_SAI_change <- function(views){
   
 }
 
-write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_1.csv")
-
-
 SAI_trends <- list()
 
 # iterate through each class/lamgauge combo

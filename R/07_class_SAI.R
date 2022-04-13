@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 # set extra library path fro when running from Python
-.libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
+.libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1"))
 
 # set working directory for base corr
 working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
