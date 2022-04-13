@@ -177,3 +177,6 @@ class_language <- fin_bound_trends %>%
 
 # save file for Shiny app - this file needs to be written SQL database
 saveRDS(class_language, paste(working_dir, "outputs/shiny_outputs/class_language_2.rds", sep = ""))
+
+write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_4.csv")
+

@@ -116,3 +116,6 @@ system.time({
 saveRDS(random_trends, paste(working_dir, "outputs/random_trends_updated.rds", sep = ""))
 
 stopCluster(cl)
+
+write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_2.csv")
+

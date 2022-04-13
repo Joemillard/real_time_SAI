@@ -181,3 +181,6 @@ class_language_models <- fin_frame_6 %>%
   mutate(language = fct_reorder(language, -predicted_values, median))
 
 saveRDS(class_language_models, paste(working_dir, "outputs/shiny_outputs/class_language_change_2.rds", sep = ""))
+
+write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_5.csv")
+

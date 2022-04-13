@@ -72,3 +72,6 @@ for(i in 1:length(language_views)){
 
 # resave the average lambda for random views, according to bootstrap method used throughout
 saveRDS(lpi_trends_adjusted, paste(working_dir, "outputs/overall_random_updated_2.rds", sep = ""))
+
+write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_3.csv")
+

@@ -169,3 +169,4 @@ lpi_trends_adjusted <- lpi_trends_adjusted %>%
 
 saveRDS(lpi_trends_adjusted, paste(working_dir, "outputs/shiny_outputs/overall_2.rds"))
 
+write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_7.csv")

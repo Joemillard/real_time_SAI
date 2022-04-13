@@ -189,3 +189,5 @@ class_trend <- rbindlist(lpi_trends_adjusted) %>%
   
 saveRDS(class_trend, paste(working_dir, "outputs/shiny_outputs/class_trend_2.rds", sep = ""))
 
+write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_6.csv")
+
