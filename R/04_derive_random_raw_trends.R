@@ -5,9 +5,12 @@
 library(parallel)
 library(dplyr)
 
+working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+
+
 # read in the rds for average monthly views and for the updated data set
-average_daily_views <- readRDS("data/average_daily_views_random_10-languages.rds") # daily average views
-average_daily_views_updated <- readRDS("data/average_daily_views_random_10-languages_updated.rds") # daily average views updated
+average_daily_views <- readRDS(paste(working_dir, "data/average_daily_views_random_10-languages.rds", sep = "")) # daily average views
+average_daily_views_updated <- readRDS(paste(working_dir, "data/average_daily_views_random_10-languages_updated.rds", sep = "")) # daily average views updated
 
 # bind together the old and newer views
 average_daily_views_new <- average_daily_views
@@ -21,7 +24,7 @@ wiki_proj <- paste(c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
 taxa_groups <- c("ACTINOPTERYGII", "AMPHIBIA", "AVES", "INSECTA", "MAMMALIA", "REPTILIA")
 
 # read in the biodiversity pages
-biodiversity_pages <- read.csv(here::here("data/all_iucn_titles.csv"), encoding = "UTF-8") %>%
+biodiversity_pages <- read.csv(paste(working_dir, "data/all_iucn_titles.csv", sep = ""), encoding = "UTF-8") %>%
   filter(site %in% wiki_proj) %>%
   filter(class_name %in% taxa_groups) %>%
   select(title, site, class_name) %>%
@@ -57,7 +60,7 @@ clusterEvalQ(cl, {
   library(mgcv)
   
   # read in additional functions
-  source("R/00_functions.R")
+  source(paste(working_dir, "R/00_functions.R", sep = ""))
   
 })
 
@@ -100,6 +103,6 @@ system.time({
 })
 
 
-saveRDS(random_trends, "outputs/random_trends_updated.rds")
+saveRDS(random_trends, paste(working_dir, "outputs/random_trends_updated.rds",sep = ""))
 
 stopCluster(cl)
