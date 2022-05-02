@@ -9,6 +9,7 @@
 # read in packages, note that located across two different folders
 library(dplyr)
 library(parallel)
+library(data.table)
 
 # set up cores for parallel processing
 cl <- makeCluster(detectCores())
@@ -22,11 +23,38 @@ average_daily_views_updated <- readRDS(paste(working_dir, "data/daily_average_vi
 
 average_daily_views_new <- average_daily_views
 
+# bind together the old two sets of views
 for(i in 1:length(average_daily_views_new)){
   for(j in 1:length(average_daily_views_new[[i]])){
     average_daily_views_new[[i]][[j]] <- rbind(average_daily_views[[i]][[j]], average_daily_views_updated[[i]][[j]])
   }
 }
+
+# languages for views
+languages <- c('^en_', '^zh_', '^fr_', '^de_', '^es_', '^ru_', '^pt_', '^it_', '^ar_', '^ja_')
+
+#taxa of interest
+taxa_ls <- c('actinopterygii', 'amphibia', 'aves', 'insecta', 'mammalia', 'reptilia')
+
+# read in all the files for the real-time downloads
+average_daily_views_real_time <- list(list())
+
+# read in each of the new real-time files
+for(i in 1:length(languages)){
+  for(j in 1:length(taxa_ls)){
+  average_daily_views_real_time[[i]][[j]] <- lapply(paste(working_dir, "data/real_time_views/species_views/",
+                                                   grep(taxa_ls[j], list.files("data/real_time_views/species_views", pattern = languages[i]), value = TRUE), sep = ""), FUN = read.csv) %>%
+    rbindlist()
+  }
+}
+
+# bind together all the real time data with the old view data
+for(i in 1:length(average_daily_views_new)){
+  for(j in 1:length(average_daily_views_new[[i]])){
+    average_daily_views_new[[i]][[j]] <- rbind(average_daily_views_new[[i]][[j]], average_daily_views_real_time[[i]][[j]])
+  }
+}
+
 
 # read in packages and data for each parallel session
 clusterEvalQ(cl, {

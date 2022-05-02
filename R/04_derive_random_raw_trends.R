@@ -17,6 +17,9 @@ working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying p
 average_daily_views <- readRDS(paste(working_dir, "data/average_daily_views_random_10-languages.rds", sep = "")) # daily average views
 average_daily_views_updated <- readRDS(paste(working_dir, "data/average_daily_views_random_10-languages_updated.rds", sep = "")) # daily average views updated
 
+# read in all the files for the real-time downloads
+average_daily_views_real_time <- list.files("data/real_time_views/random_views")
+
 # bind together the old and newer views
 average_daily_views_new <- average_daily_views
 

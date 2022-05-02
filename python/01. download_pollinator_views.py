@@ -9,62 +9,6 @@ import datetime
 from datetime import date
 from subprocess import Popen, PIPE
 
-# run command for calling R from Python, with error capture -- 03_derive_species_raw_trends.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/03_derive_species_raw_trends.R"]
-p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-output, error = p.communicate()
-          
-print('R OUTPUT:\n {0}'.format(output))                            
-print('R ERROR:\n {0}'.format(error))
-
-# run command for calling R from Python, with error capture -- 04_derive_random_raw_trends.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04_derive_random_raw_trends.R"]
-p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-output, error = p.communicate()
-          
-print('R OUTPUT:\n {0}'.format(output))                            
-print('R ERROR:\n {0}'.format(error))
-
-# run command for calling R from Python, with error capture -- 04a_bootstrap_overall_random.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04a_bootstrap_overall_random.R"]
-p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-output, error = p.communicate()
-          
-print('R OUTPUT:\n {0}'.format(output))                            
-print('R ERROR:\n {0}'.format(error))
-
-# run command for calling R from Python, with error capture -- 05_class_language_SAI.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/05_class_language_SAI.R"]
-p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-output, error = p.communicate()
-          
-print('R OUTPUT:\n {0}'.format(output))                            
-print('R ERROR:\n {0}'.format(error))
-
-# run command for calling R from Python, with error capture -- 06_taxa_language_SAI_model.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/06_taxa_language_SAI_model.R"]
-p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-output, error = p.communicate()
-          
-print('R OUTPUT:\n {0}'.format(output))                            
-print('R ERROR:\n {0}'.format(error)) 
-
-# run command for calling R from Python, with error capture -- 07_class_SAI.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/07_class_SAI.R"]
-p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-output, error = p.communicate()
-          
-print('R OUTPUT:\n {0}'.format(output))                            
-print('R ERROR:\n {0}'.format(error))
-
-# run command for calling R from Python, with error capture -- 08_overall_SAI.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/08_overall_SAI.R"]
-p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-output, error = p.communicate()
-          
-print('R OUTPUT:\n {0}'.format(output))                            
-print('R ERROR:\n {0}'.format(error))
-
 if __name__ == "__main__":
 	###
 	# SET UP
@@ -77,11 +21,12 @@ if __name__ == "__main__":
 	languages = ['en', 'zh', 'fr', 'de', 'es', 'ru', 'pt', 'it', 'ar', 'ja']
 
 	#taxa of interest
-	taxa_ls = ['ACTINOPTERYGII', 'AMPHIBIA', 'AVES', 'INSECTA', 'MAMMALIA', 'REPTILIA']
+	taxa_ls = ['ACTINOPTERYGII', 'AMPHIBIA', 'AVES', 'INSECTA', 'MAMMALIA', 'REPTILIA', 'RANDOM']
 
 	# Load and prepare page info
 	### EDIT FILEPATH
 	pages = pd.read_csv("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/class_wiki_indices/submission_2/all_iucn_titles.csv")
+        random_pages = pd.read_csv("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/class_wiki_indices/submission_2/random_pages.csv")
 
 	# only if site in languages + 'wiki'
 	wiki_langs = [lang + "wiki" for lang in languages] 
@@ -274,14 +219,67 @@ if __name__ == "__main__":
 						print(title, "connect_fail")
 						time.sleep(300)
 
-					
 			# concatenate all appended results to dataframe and write to csv for each subset
 			final = pd.concat(result).reset_index(drop = True)
 			# taxa_level = taxa_string #s[j]
 			### EDIT FILEPATH
-			save_loc = 'D:/wikipedia_views/%s_%s_user_trends_%s_%s.csv' % (lang, taxa_string, last_month_strt_f, last_month_end_f) # Home PC
+
+			save_loc = 'C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/data/real_time_views/species_views/%s_%s_user_trends_%s_%s.csv' % (lang, taxa_string, last_month_strt_f, last_month_end_f) # Home PC
 			# print(save_loc)
-			# save_loc = ('C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/wikipedia_target-1-metric/data/class_wiki_indices/submission_2/user_trends/%s%s_user_trends.csv') % ((languages[l] + '_'), (taxa_level + '_')) # CBER PC
 			final.to_csv(save_loc, sep = ',', encoding = 'utf-8-sig')
 
+# run command for calling R from Python, with error capture -- 03_derive_species_raw_trends.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/03_derive_species_raw_trends.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
 
+# run command for calling R from Python, with error capture -- 04_derive_random_raw_trends.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04_derive_random_raw_trends.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 04a_bootstrap_overall_random.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04a_bootstrap_overall_random.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 05_class_language_SAI.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/05_class_language_SAI.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 06_taxa_language_SAI_model.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/06_taxa_language_SAI_model.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error)) 
+
+# run command for calling R from Python, with error capture -- 07_class_SAI.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/07_class_SAI.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
+
+# run command for calling R from Python, with error capture -- 08_overall_SAI.R
+cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/08_overall_SAI.R"]
+p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+output, error = p.communicate()
+          
+print('R OUTPUT:\n {0}'.format(output))                            
+print('R ERROR:\n {0}'.format(error))
