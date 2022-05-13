@@ -9,6 +9,7 @@
 # for parallel session
 library(parallel)
 library(dplyr)
+library(data.table)
 
 # set working directory for base corr
 working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
@@ -17,14 +18,29 @@ working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying p
 average_daily_views <- readRDS(paste(working_dir, "data/average_daily_views_random_10-languages.rds", sep = "")) # daily average views
 average_daily_views_updated <- readRDS(paste(working_dir, "data/average_daily_views_random_10-languages_updated.rds", sep = "")) # daily average views updated
 
-# read in all the files for the real-time downloads
-average_daily_views_real_time <- list.files("data/real_time_views/random_views")
-
 # bind together the old and newer views
 average_daily_views_new <- average_daily_views
 
 for(i in 1:length(average_daily_views_new)){
   average_daily_views_new[[i]] <- rbind(average_daily_views[[i]], average_daily_views_updated[[i]])
+}
+
+# languages for views
+languages <- c('^en_', '^zh_', '^fr_', '^de_', '^es_', '^ru_', '^pt_', '^it_', '^ar_', '^ja_')
+
+# read in all the files for the real-time downloads
+average_daily_views_real_time <- list()
+
+# read in each of the new real-time files
+for(i in 1:length(languages)){
+    average_daily_views_real_time[[i]] <- lapply(paste(working_dir, "data/real_time_views/random_views/",
+                                                            list.files("data/real_time_views/random_views", pattern = languages[i]), sep = ""), FUN = read.csv) %>%
+      rbindlist()
+}
+
+# bind together all the real time data with the old view data
+for(i in 1:length(average_daily_views_new)){
+  average_daily_views_new[[i]] <- rbind(average_daily_views_new[[i]], average_daily_views_real_time[[i]])
 }
 
 # set up vectors of wiki project class to remove any animal species from the random data
