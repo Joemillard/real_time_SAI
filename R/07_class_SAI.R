@@ -13,6 +13,20 @@ library(dplyr)
 library(ggplot2)
 library(boot)
 library(forcats)
+library(aws.s3)
+
+# each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
+s3BucketName <- "speciesawarenessindex"
+
+# read in each of the secret keys hosted online
+AWS_ACCESS_KEY_ID <- read.table("R/app/AWS_ACCESS_KEY_ID.txt")
+AWS_SECRET_ACCESS_KEY <- read.table("R/app/AWS_SECRET_ACCESS_KEY.txt")
+AWS_DEFAULT_REGION <- read.table("R/app/AWS_DEFAULT_REGION.txt")
+
+# set system environment for each of AWS keys
+Sys.setenv("AWS_ACCESS_KEY_ID" = AWS_ACCESS_KEY_ID,
+           "AWS_SECRET_ACCESS_KEY" = AWS_SECRET_ACCESS_KEY,
+           "AWS_DEFAULT_REGION" = AWS_DEFAULT_REGION)
 
 # source the functions R script
 source(paste(working_dir, "R/00_functions.R", sep = ""))
@@ -187,7 +201,9 @@ class_trend <- rbindlist(lpi_trends_adjusted) %>%
   mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia"),
                        labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians")))
   
-saveRDS(class_trend, paste(working_dir, "outputs/shiny_outputs/class_trend_2.rds", sep = ""))
+#saveRDS(class_trend, paste(working_dir, "outputs/shiny_outputs/class_trend_2.rds", sep = ""))
+s3write_using(class_trend, FUN = saveRDS, object = "class_trend_2.rds", bucket = s3BucketName)
+
 
 write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_6.csv")
 
