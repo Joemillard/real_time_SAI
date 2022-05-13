@@ -193,6 +193,5 @@ class_language <- fin_bound_trends %>%
 #saveRDS(class_language, paste(working_dir, "outputs/shiny_outputs/class_language_2.rds", sep = ""))
 s3write_using(class_language, FUN = saveRDS, object = "class_language_2.rds", bucket = s3BucketName)
 
-
 write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_4.csv")
 
