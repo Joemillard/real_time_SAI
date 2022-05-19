@@ -37,21 +37,31 @@ languages <- c('^en_', '^zh_', '^fr_', '^de_', '^es_', '^ru_', '^pt_', '^it_', '
 taxa_ls <- c('actinopterygii', 'amphibia', 'aves', 'insecta', 'mammalia', 'reptilia')
 
 # read in all the files for the real-time downloads
-average_daily_views_real_time <- list(list())
+average_daily_views_real_time <- list()
+average_daily_views_real_time_agg <- list()
 
-# read in each of the new real-time files
+# read in each of the new real-time files, binding multiple reads of each taxa/language combination for multiple months
 for(i in 1:length(languages)){
   for(j in 1:length(taxa_ls)){
-  average_daily_views_real_time[[i]][[j]] <- lapply(paste(working_dir, "data/real_time_views/species_views/",
+  average_daily_views_real_time[[j]] <- lapply(paste(working_dir, "data/real_time_views/species_views/",
                                                    grep(taxa_ls[j], list.files("data/real_time_views/species_views", pattern = languages[i]), value = TRUE), sep = ""), FUN = read.csv) %>%
-    rbindlist()
+    rbindlist() %>%
+    select(-ï..) %>%
+    mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
+    select(article, q_wikidata, year, month, av_views, date) %>%
+    mutate(year = as.character(year)) %>%
+    mutate(month = as.character(month))
   }
+  
+  average_daily_views_real_time_agg[[i]] <- average_daily_views_real_time
+  
 }
 
-# bind together all the real time data with the old view data
+# bind together all the real time data with the old view data, and filter out NA timestamps
 for(i in 1:length(average_daily_views_new)){
   for(j in 1:length(average_daily_views_new[[i]])){
-    average_daily_views_new[[i]][[j]] <- rbind(average_daily_views_new[[i]][[j]], average_daily_views_real_time[[i]][[j]])
+    average_daily_views_new[[i]][[j]] <- rbind(average_daily_views_new[[i]][[j]], average_daily_views_real_time_agg[[i]][[j]]) %>%
+      filter(!is.na(date))
   }
 }
 
@@ -77,6 +87,8 @@ clusterEvalQ(cl, {
 
 # set up the function for calculating trends
 run_SAI_change <- function(views){
+  
+  browser()
   
   # arrange views by date
   views <- views %>%
@@ -112,7 +124,7 @@ SAI_trends <- list()
 
 # iterate through each class/lamgauge combo
 system.time({
-  for(i in 1:length(average_daily_views)){
+  for(i in 1:length(average_daily_views_new)){
   
     SAI_trends[[i]] <- parLapply(cl, average_daily_views_new[[i]], fun = run_SAI_change)
     
@@ -124,6 +136,3 @@ system.time({
 stopCluster(cl)
 
 saveRDS(SAI_trends, paste(working_dir, "outputs/species_trends_updated_2.rds", sep = ""))
-
-write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_1.csv")
-
