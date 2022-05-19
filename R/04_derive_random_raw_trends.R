@@ -35,12 +35,18 @@ average_daily_views_real_time <- list()
 for(i in 1:length(languages)){
     average_daily_views_real_time[[i]] <- lapply(paste(working_dir, "data/real_time_views/random_views/",
                                                             list.files("data/real_time_views/random_views", pattern = languages[i]), sep = ""), FUN = read.csv) %>%
-      rbindlist()
+      rbindlist() %>%
+      select(-ï..) %>%
+      mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
+      select(article, q_wikidata, year, month, av_views, date) %>%
+      mutate(year = as.character(year)) %>%
+      mutate(month = as.character(month))
 }
 
 # bind together all the real time data with the old view data
 for(i in 1:length(average_daily_views_new)){
-  average_daily_views_new[[i]] <- rbind(average_daily_views_new[[i]], average_daily_views_real_time[[i]])
+  average_daily_views_new[[i]] <- rbind(average_daily_views_new[[i]], average_daily_views_real_time[[i]]) %>%
+    filter(!is.na(date))
 }
 
 # set up vectors of wiki project class to remove any animal species from the random data
