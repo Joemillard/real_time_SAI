@@ -26,7 +26,7 @@ for(i in 1:length(average_daily_views_new)){
 }
 
 # languages for views
-languages <- c('^en_', '^zh_', '^fr_', '^de_', '^es_', '^ru_', '^pt_', '^it_', '^ar_', '^ja_')
+languages <- c('^es_', '^fr_', '^de_', '^ja_', '^it_', '^ar_', '^ru_', '^pt_', '^zh_', '^en_')
 
 # read in all the files for the real-time downloads
 average_daily_views_real_time <- list()
@@ -72,10 +72,28 @@ filter_species <- function(data_file, split_biodiversity_pages){
 }
 
 # merge the random species title with the all species list for each language to remove species from random - antijoin to remove those in both
-for(i in 1:length(average_daily_views)){
-  average_daily_views[[i]] <- filter_species(data_file = average_daily_views[[i]], 
+for(i in 1:length(average_daily_views_new)){
+  average_daily_views_new[[i]] <- filter_species(data_file = average_daily_views_new[[i]], 
                                              split_biodiversity_pages = split_biodiversity_pages[[i]]) %>%
     select(article, q_wikidata, year, month, av_views, date)
+}
+
+# filter out any random page that doesn't have at least half the months
+total_month <- list()
+
+for(i in 1:length(average_daily_views_new)){
+  total_month[[i]] <- average_daily_views_new[[i]] %>%
+    group_by(article) %>%
+    tally() %>%
+    filter(n >= max(n)) %>%
+    pull(article)
+           
+}
+
+# filter out pages that have less than half then months represented
+for(i in 1:length(average_daily_views_new)){
+  average_daily_views_new[[i]] <- average_daily_views_new[[i]] %>%
+    filter(article %in% total_month[[i]])
 }
 
 # set up cores for parallel processing
