@@ -40,7 +40,7 @@ for(i in 1:length(languages)){
       mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
       select(article, q_wikidata, year, month, av_views, date) %>%
       mutate(year = as.character(year)) %>%
-      mutate(month = as.character(month))
+      mutate(month = as.character(substr(date, start = 6, stop = 7)))
 }
 
 # bind together all the real time data with the old view data
@@ -78,23 +78,6 @@ for(i in 1:length(average_daily_views_new)){
     select(article, q_wikidata, year, month, av_views, date)
 }
 
-# filter out any random page that doesn't have at least half the months
-total_month <- list()
-
-for(i in 1:length(average_daily_views_new)){
-  total_month[[i]] <- average_daily_views_new[[i]] %>%
-    group_by(article) %>%
-    tally() %>%
-    filter(n >= max(n)) %>%
-    pull(article)
-           
-}
-
-# filter out pages that have less than half then months represented
-for(i in 1:length(average_daily_views_new)){
-  average_daily_views_new[[i]] <- average_daily_views_new[[i]] %>%
-    filter(article %in% total_month[[i]])
-}
 
 # set up cores for parallel processing
 cl <- makeCluster(detectCores())
