@@ -31,7 +31,7 @@ for(i in 1:length(average_daily_views_new)){
 }
 
 # languages for views
-languages <- c('^en_', '^zh_', '^fr_', '^de_', '^es_', '^ru_', '^pt_', '^it_', '^ar_', '^ja_')
+languages <- c('^es_', '^fr_', '^de_', '^ja_', '^it_', '^ar_', '^ru_', '^pt_', '^zh_', '^en_')
 
 #taxa of interest
 taxa_ls <- c('actinopterygii', 'amphibia', 'aves', 'insecta', 'mammalia', 'reptilia')
@@ -50,7 +50,7 @@ for(i in 1:length(languages)){
     mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
     select(article, q_wikidata, year, month, av_views, date) %>%
     mutate(year = as.character(year)) %>%
-    mutate(month = as.character(month))
+    mutate(month = as.character(substr(date, start = 6, stop = 7)))
   }
   
   average_daily_views_real_time_agg[[i]] <- average_daily_views_real_time
@@ -64,7 +64,6 @@ for(i in 1:length(average_daily_views_new)){
       filter(!is.na(date))
   }
 }
-
 
 # read in packages and data for each parallel session
 clusterEvalQ(cl, {
@@ -136,3 +135,6 @@ system.time({
 stopCluster(cl)
 
 saveRDS(SAI_trends, paste(working_dir, "outputs/species_trends_updated_2.rds", sep = ""))
+
+write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_1.csv")
+
