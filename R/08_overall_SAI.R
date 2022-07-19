@@ -188,7 +188,7 @@ lpi_trends_adjusted <- lpi_trends_adjusted %>%
   mutate(Year = as.Date(Year, "%Y_%m_%d"))
 
 # save rds locally for python code and to aws for shiny app
-write.table(lpi_trends_adjusted, paste(working_dir, "outputs/overall_2.csv", sep = ""))
+write.csv(lpi_trends_adjusted, paste(working_dir, "outputs/overall_2.csv", sep = ""), row.names=FALSE)
 s3write_using(lpi_trends_adjusted, FUN = saveRDS, object = "overall_2.rds", bucket = s3BucketName)
 
 write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_7.csv")
