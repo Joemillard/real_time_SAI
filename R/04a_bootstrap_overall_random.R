@@ -23,22 +23,20 @@ for(i in 1:length(language_views)){
 }
 
 # set up vector of column names
-date_vec <- c(colnames(language_views[[1]][,2:76]))
+date_vec <- c(colnames(language_views[[1]][,2:ncol(language_views[[1]])]))
 
 # set up language vector
 language_vec <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
 
 # Function to calculate index from lambdas selected by 'ind'
 create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
-  
-  # remove na rows
-  lambdas_new <- lambdas[complete.cases(lambdas), ]
-  
+
   # select columns from lambda file to calculate mean, and build a cumprod trend
-  lambda_data <- lambdas_new[, 3:ncol(lambdas_new)]
+  lambda_data <- lambdas[, 3:ncol(lambdas)]
   this_lambdas <- lambda_data[ind, ]
   mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
   trend <- cumprod(10^c(0, mean_ann_lambda))
+
   return(trend)
 }
 
@@ -48,11 +46,12 @@ run_each_group <- function(lambda_files, random_trend){
   # Bootstrap these to get confidence intervals
   dbi.boot <- boot(lambda_files, create_lpi, R = 1000)
   
+  print(dbi.boot)
+  
   # Construct dataframe and get mean and 95% intervals
-  boot_res <- data.frame(LPI = dbi.boot$t0)
-  boot_res$Year <- random_trend
-  boot_res$LPI_upr <- apply(dbi.boot$t, 2, quantile, probs = c(0.975), na.rm = TRUE) 
-  boot_res$LPI_lwr <- apply(dbi.boot$t, 2, quantile, probs = c(0.025), na.rm = TRUE)
+  boot_res <- data.frame("LPI" = dbi.boot$t0, "Year" = random_trend[0:length(dbi.boot$t0)])
+  boot_res$LPI_upr <- apply(dbi.boot$t, 2, quantile, probs = c(0.975)) 
+  boot_res$LPI_lwr <- apply(dbi.boot$t, 2, quantile, probs = c(0.025))
   return(boot_res)
 }
 
