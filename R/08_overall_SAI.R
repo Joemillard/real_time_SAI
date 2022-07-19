@@ -41,7 +41,7 @@ for(i in 1:length(species_trends_updated)){
 }
 
 # set up vector of column names
-date_vec <- c(colnames(species_trends_updated[[1]][[1]])[2:76])
+date_vec <- c(colnames(species_trends_updated[[1]][[1]][,2:ncol(species_trends_updated[[1]][[1]])]))
 
 # read in the string of languages - original order sorted alphabetically for files read in
 languages <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
@@ -53,7 +53,7 @@ random_trend <- readRDS(paste(working_dir, "outputs/overall_random_updated_2.rds
 # adjust the year column
 for(i in 1:length(random_trend)){
   random_trend[[i]]$language <- languages[i]
-  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:75])))
+  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:length(date_vec)])))
 }
 
 # string for pollinating classes, plus random
