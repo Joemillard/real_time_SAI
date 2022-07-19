@@ -43,7 +43,7 @@ for(i in 1:length(species_trends_updated)){
 }
 
 # set up vector of column names
-date_vec <- c(colnames(species_trends_updated[[1]][[1]])[2:76])
+date_vec <- c(colnames(species_trends_updated[[1]][[1]][,2:ncol(species_trends_updated[[1]][[1]])]))
 
 # read in the string of languages - original order sorted alphabetically for files read in
 languages <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
@@ -55,7 +55,7 @@ random_trend <- readRDS(paste(working_dir, "outputs/overall_random_updated_2.rds
 # adjust the year column
 for(i in 1:length(random_trend)){
   random_trend[[i]]$language <- languages[i]
-  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:75])))
+  random_trend[[i]]$lamda = c(0, diff(log10(random_trend[[i]]$LPI_final[1:length(date_vec)])))
 }
 
 # string for pollinating classes, plus random
@@ -140,8 +140,8 @@ average_lambda <- function(data_file, taxa, series_start, series_end){
 }
 
 # calculate the average lambda and add language/class columns, just for complete years
-series_start <- c("2016_01")
-series_end <- c("2021_01")
+series_start <- head(date_vec[grepl("_01", date_vec)], 1)
+series_end <- tail(date_vec[grepl("_01", date_vec)], 1)
 
 # calculate the average lambda and add language/class columns
 avg_lambdas <- list()
@@ -194,7 +194,6 @@ class_language_models <- fin_frame_6 %>%
   mutate(taxa = fct_reorder(taxa, -predicted_values, median)) %>%
   mutate(language = fct_reorder(language, -predicted_values, median))
 
-#saveRDS(class_language_models, paste(working_dir, "outputs/shiny_outputs/class_language_change_2.rds", sep = ""))
 s3write_using(class_language_models, FUN = saveRDS, object = "class_language_change_2.rds", bucket = s3BucketName)
 
 write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_5.csv")
