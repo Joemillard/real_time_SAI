@@ -118,8 +118,8 @@ server <- function(input, output) {
     
   })
   
-  ### RC 20220411
-  ## Server code to execute dl for each button/data frame
+  # RC 20220411
+  # class by language trend for download
   output$class_language_dl <- downloadHandler(
     filename = function(){
       paste("class_language_SAI_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
@@ -129,6 +129,7 @@ server <- function(input, output) {
     }
   )
   
+  # class by language change for download
   output$class_language_change_dl <- downloadHandler(
     filename = function(){
       paste("class_language_change_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
@@ -138,6 +139,7 @@ server <- function(input, output) {
     }
   )
   
+  # class trend for download
   output$class_SAI_dl <- downloadHandler(
     filename = function(){
       paste("class_SAI_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
@@ -147,6 +149,7 @@ server <- function(input, output) {
     }
   )
   
+  # overall trend for download
   output$overall_SAI_dl <- downloadHandler(
     filename = function(){
       paste("overall_SAI_", gsub("-", "_", Sys.Date()), ".csv", sep = "")
@@ -155,5 +158,4 @@ server <- function(input, output) {
       write.csv(overall_SAI, file, row.names = F)
     }
   )
-  ###
 }
