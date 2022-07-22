@@ -16,10 +16,13 @@ library(aws.s3)
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
 s3BucketName <- "speciesawarenessindex"
 
+# set working directory for base corr
+working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+
 # read in each of the secret keys hosted online
-AWS_ACCESS_KEY_ID <- read.table("R/app/AWS_ACCESS_KEY_ID.txt")
-AWS_SECRET_ACCESS_KEY <- read.table("R/app/AWS_SECRET_ACCESS_KEY.txt")
-AWS_DEFAULT_REGION <- read.table("R/app/AWS_DEFAULT_REGION.txt")
+AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))
+AWS_SECRET_ACCESS_KEY <- read.table(paste(working_dir, "R/app/AWS_SECRET_ACCESS_KEY.txt", sep = ""))
+AWS_DEFAULT_REGION <- read.table(paste(working_dir, "R/app/AWS_DEFAULT_REGION.txt", sep = ""))
 
 # set system environment for each of AWS keys
 Sys.setenv("AWS_ACCESS_KEY_ID" = AWS_ACCESS_KEY_ID,
@@ -167,12 +170,12 @@ wiki_average <- function(data_file){
 # rbindlist all lambda together and calculate averge for each species across languages
 merge_species <- list()
 for(i in 1:length(smoothed_adjusted_lamda)){
-  merge_species[[i]] <- rbindlist(smoothed_adjusted_lamda[[i]]) %>%
+  merge_species[[i]] <- rbindlist(smoothed_adjusted_lamda[[i]], use.names = TRUE) %>%
     mutate(language = languages[i])
 }
 
 # merge all the lambda files, and calc average across each q_wikidata
-merge_species <- rbindlist(merge_species) %>% 
+merge_species <- rbindlist(merge_species, use.names = TRUE) %>% 
   wiki_average()
 
 # reshape lambda files back into year rows, and then split into separate taxonomic classes
