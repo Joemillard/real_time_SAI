@@ -15,11 +15,11 @@ library(boot)
 library(forcats)
 library(aws.s3)
 
+# source the functions R script
+source(paste(working_dir, "R/00_functions.R", sep = ""))
+
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
 s3BucketName <- "speciesawarenessindex"
-
-# set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
 
 # read in each of the secret keys hosted online
 AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))
@@ -79,48 +79,7 @@ for(i in 1:length(species_trends_updated)){
 
 # smooth the adjusted random lambda for each species
 # iterate through all the articles of that class/language
-smooth_series <- function(X){
-  
-  # create index
-  index <- cumprod(10^c(0, X))
-  
-  # smooth the index
-  x_range <- 1:length(index)
-  y.loess <- loess(index~x_range, span = 0.30)
-  data_fin <- predict(y.loess, data.frame(x_range))
-  return(data_fin)
-}
-
-# convert the index back to lambda
-create_lambda <- function(X){
-  lambda <- c(1, diff(log10(X)))
-  return(lambda)
-}
-
 # convert back to index, run the smooth for random adjusted lambda, and then convert back the lamda
-smooth_all_groups <- function(data_file){
-  
-  # set up an empty list for smoothed values
-  smoothed_indices <- list()
-  
-  # smooth the series for each row (species)
-  for(i in 1:nrow(data_file)){
-    smoothed_indices[[i]] <- smooth_series(X = as.numeric(as.vector(data_file[i, 3:ncol(data_file)])))
-    smoothed_indices[[i]] <- create_lambda(smoothed_indices[[i]])
-  }
-  
-  smoothed_lambda <- as.data.frame(do.call(rbind, smoothed_indices))
-  
-  # add back in the original column names
-  colnames(smoothed_lambda) <- colnames(data_file)[2:ncol(data_file)]
-  
-  # bind the adjusted smoothed lambda back onto the first four columns
-  smoothed_lambda <- cbind(data_file[,1], smoothed_lambda)
-  
-  return(smoothed_lambda)
-  
-}
-
 # run the smoothing of lamdas over each class/language combination
 smoothed_adjusted_lamda <- list()
 for(i in 1:length(all_lambdas)){
@@ -134,34 +93,6 @@ for(i in 1:length(all_lambdas)){
 names(smoothed_adjusted_lamda) <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en") 
 for(i in 1:length(smoothed_adjusted_lamda)){
   names(smoothed_adjusted_lamda[[i]]) <- (c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia"))
-}
-
-# Function to calculate index from lambdas selected by 'ind'
-create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
-  
-  # remove na rows
-  lambdas_new <- lambdas[complete.cases(lambdas), ]
-  
-  # select columns from lambda file to calculate mean, and build a cumprod trend
-  lambda_data <- lambdas_new[, 3:ncol(lambdas_new)]
-  this_lambdas <- lambda_data[ind, ]
-  mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
-  trend <- cumprod(10^c(0, mean_ann_lambda))
-  return(trend)
-}
-
-# function for boostrapping the create_lpi function for each lambda, and generating a 95 % confidence interval
-run_each_group <- function(lambda_files, random_trend){
-  
-  # Bootstrap these to get confidence intervals
-  dbi.boot <- boot(lambda_files, create_lpi, R = 1000)
-  
-  # Construct dataframe and get mean and 95% intervals
-  boot_res <- data.frame(LPI = dbi.boot$t0)
-  boot_res$Year <- random_trend
-  boot_res$LPI_upr <- apply(dbi.boot$t, 2, quantile, probs = c(0.975), na.rm = TRUE) 
-  boot_res$LPI_lwr <- apply(dbi.boot$t, 2, quantile, probs = c(0.025), na.rm = TRUE)
-  return(boot_res)
 }
 
 # run the boostrapping of trends for each lambda

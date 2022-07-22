@@ -79,67 +79,12 @@ for(i in 1:length(species_trends_updated)){
 
 # smooth the adjusted random lambda for each species
 # iterate through all the articles of that class/language
-smooth_series <- function(X){
-  
-  # create index
-  index <- cumprod(10^c(0, X))
-  
-  # smooth the index
-  x_range <- 1:length(index)
-  y.loess <- loess(index~x_range, span = 0.30)
-  data_fin <- predict(y.loess, data.frame(x_range))
-  return(data_fin)
-}
-
-# convert the index back to lambda
-create_lambda <- function(X){
-  lambda <- c(1, diff(log10(X)))
-  return(lambda)
-}
-
 # convert back to index, run the smooth for random adjusted lambda, and then convert back the lamda
-smooth_all_groups <- function(data_file){
-  
-  # set up an empty list for smoothed values
-  smoothed_indices <- list()
-  
-  # smooth the series for each row (species)
-  for(i in 1:nrow(data_file)){
-    smoothed_indices[[i]] <- smooth_series(X = as.numeric(as.vector(data_file[i, 3:ncol(data_file)])))
-    smoothed_indices[[i]] <- create_lambda(smoothed_indices[[i]])
-  }
-  
-  smoothed_lambda <- as.data.frame(do.call(rbind, smoothed_indices))
-  
-  # add back in the original column names
-  colnames(smoothed_lambda) <- colnames(data_file)[2:ncol(data_file)]
-  
-  # bind the adjusted smoothed lambda back onto the first four columns and correct year
-  smoothed_lambda <- cbind(data_file[,1], smoothed_lambda)
-  
-  return(smoothed_lambda)
-  
-}
-
 # run the smoothing of lamdas over each class/language combination
 smoothed_adjusted_lamda <- list()
 for(i in 1:length(all_lambdas)){
   smoothed_adjusted_lamda[[i]] <- lapply(all_lambdas[[i]], smooth_all_groups)
   print(i)
-}
-
-# calculate average for each row and reformat with language and class included
-average_lambda <- function(data_file, taxa, series_start, series_end){
-  
-  # builds subset of columns to calculate average over
-  data_fin <- data_file
-  
-  # select lambda columns
-  data_subset <- data_fin[, (grep(series_start, colnames(data_fin))):grep(series_end, colnames(data_fin))]
-  
-  # remove NAs from mean calculation using rowMeans
-  data_fin$av_lambda <- apply(data_subset, 1, mean, na.rm = TRUE)
-  return(data_fin)
 }
 
 # calculate the average lambda and add language/class columns, just for complete years

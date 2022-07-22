@@ -233,42 +233,118 @@ species_lambdas_fn <- function(pop_data, limiter=FALSE) {
   
 }
 
-# aggregate the views for each of birds, mammals, and insects
-run_dat <- function(terms_1, av_all){
+# set up the function for calculating trends
+run_SAI_change <- function(views){
   
-  terms <- terms_1  
-  
-  terms$year <- substr(terms$timestamp, start = 1, stop = 4)
-  terms$month <- substr(terms$timestamp, start = 5, stop = 6)
-  terms$day <- substr(terms$timestamp, start = 7, stop = 8)
-  
-  terms <- terms %>%
-    select(article, q_wikidata, year, month, views)
-  
-  # calculate average per each month
-  terms_av <- terms %>%
-    group_by(article, q_wikidata, year, month) %>%
-    summarise(av_views = mean(views, na.rm = TRUE)) %>%
+  # arrange views by date
+  views <- views %>%
+    group_by(q_wikidata) %>%
+    arrange(date) %>%
     ungroup()
   
-  if(av_all == TRUE) {
-    
-    # calculate average per each month
-    terms_av_year <- terms %>%
-      group_by(year, month) %>%
-      summarise(av_views = mean(views, na.rm = TRUE)) %>%
-      ungroup()
-    
-    terms_av_year$date <- paste(terms_av_year$year, terms_av_year$month, sep = "-")
-    terms_av_year$date <- as.Date(paste(terms_av_year$date,"-01",sep=""))
-    return(terms_av_year)
-    
+  # convert to wide format
+  views_wide <- tidyr::pivot_wider(views, 
+                                   names_from = c(year, month), 
+                                   values_from = av_views, 
+                                   id_cols=c(year, month, av_views, q_wikidata))
+  
+  # remove any rows with NA and add 1 for following function
+  views_wide <- views_wide[complete.cases(views_wide), ]
+  
+  # model each row with a GAM
+  views_gammed <- gam_fn(views_wide)
+  
+  # convert to rates of change
+  # if you do not want to limit log rates of change to [-1,1] (LPI default) set limiter=FALSE
+  views_lambdas_list <- species_lambdas_fn(views_gammed,
+                                           limiter=TRUE)
+  
+  # convert list of lambdas to data frame
+  views_lambdas_dataframe <- do.call(rbind, views_lambdas_list)
+  
+  return(views_lambdas_dataframe)
+  
+}
+
+# Function to calculate index from lambdas selected by 'ind'
+create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
+  
+  # select columns from lambda file to calculate mean, and build a cumprod trend
+  lambda_data <- lambdas[, 3:ncol(lambdas)]
+  this_lambdas <- lambda_data[ind, ]
+  mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
+  trend <- cumprod(10^c(0, mean_ann_lambda))
+  
+  return(trend)
+}
+
+# function for boostrapping the create_lpi function for each lambda, and generating a 95 % confidence interval
+run_each_group <- function(lambda_files, random_trend){
+  
+  # Bootstrap these to get confidence intervals
+  dbi.boot <- boot(lambda_files, create_lpi, R = 1000)
+  
+  # Construct dataframe and get mean and 95% intervals
+  boot_res <- data.frame("LPI" = dbi.boot$t0, "Year" = random_trend)
+  boot_res$LPI_upr <- apply(dbi.boot$t, 2, quantile, probs = c(0.975), na.rm = TRUE) 
+  boot_res$LPI_lwr <- apply(dbi.boot$t, 2, quantile, probs = c(0.025), na.rm = TRUE)
+  return(boot_res)
+
+}
+
+# smooth the random adjusted species pages
+smooth_series <- function(X){
+  
+  # create index
+  index <- cumprod(10^c(0, X))
+  
+  # smooth the index
+  x_range <- 1:length(index)
+  y.loess <- loess(index~x_range, span = 0.30)
+  data_fin <- predict(y.loess, data.frame(x_range))
+  return(data_fin)
+}
+
+# convert the index back to lambda
+create_lambda <- function(X){
+  lambda <- c(1, diff(log10(X)))
+  return(lambda)
+}
+
+# convert back to index, run the smooth for random adjusted lambda, and then convert back the lamda
+smooth_all_groups <- function(data_file){
+  
+  # set up an empty list for smoothed values
+  smoothed_indices <- list()
+  
+  # smooth the series for each row (species)
+  for(i in 1:nrow(data_file)){
+    smoothed_indices[[i]] <- smooth_series(X = as.numeric(as.vector(data_file[i, 3:ncol(data_file)])))
+    smoothed_indices[[i]] <- create_lambda(smoothed_indices[[i]])
   }
   
-  else{
-    terms_av$date <- paste(terms_av$year, terms_av$month, sep = "-")
-    terms_av$date <- as.Date(paste(terms_av$date,"-01",sep=""))
-    
-    return(terms_av)
-  }
+  smoothed_lambda <- as.data.frame(do.call(rbind, smoothed_indices))
+  
+  # add back in the original column names
+  colnames(smoothed_lambda) <- colnames(data_file)[2:ncol(data_file)]
+  
+  # bind the adjusted smoothed lambda back onto the first four columns
+  smoothed_lambda <- cbind(data_file[,1], smoothed_lambda)
+  
+  return(smoothed_lambda)
+  
+}
+
+# calculate average for each row and reformat with language and class included
+average_lambda <- function(data_file, taxa, series_start, series_end){
+  
+  # builds subset of columns to calculate average over
+  data_fin <- data_file
+  
+  # select lambda columns
+  data_subset <- data_fin[, (grep(series_start, colnames(data_fin))):grep(series_end, colnames(data_fin))]
+  
+  # remove NAs from mean calculation using rowMeans
+  data_fin$av_lambda <- apply(data_subset, 1, mean, na.rm = TRUE)
+  return(data_fin)
 }

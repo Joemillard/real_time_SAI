@@ -36,6 +36,9 @@ clusterEvalQ(cl, {
 # set working directory for base corr
 working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
 
+# source the functions R script
+source(paste(working_dir, "R/00_functions.R", sep = ""))
+
 # read in the rds for average monthly views and for the updated data set
 average_daily_views <- readRDS(paste(working_dir, "data/daily_average_views_10-languages.rds", sep = "")) # daily average views
 average_daily_views_updated <- readRDS(paste(working_dir, "data/daily_average_views_10-languages_updated.rds", sep = "")) # daily average views updated
@@ -84,41 +87,6 @@ for(i in 1:length(average_daily_views_new)){
   }
 }
 
-# set up the function for calculating trends
-run_SAI_change <- function(views){
-  
-  browser()
-  
-  # arrange views by date
-  views <- views %>%
-    group_by(q_wikidata) %>%
-    arrange(date) %>%
-    ungroup()
-  
-  # convert to wide format
-  views_wide <- tidyr::pivot_wider(views, 
-                                   names_from = c(year, month), 
-                                   values_from = av_views, 
-                                   id_cols=c(year, month, av_views, q_wikidata))
-
-  # remove any rows with NA and add 1 for following function
-  views_wide <- views_wide[complete.cases(views_wide), ]
-
-  # model each row with a GAM
-  views_gammed <- gam_fn(views_wide)
-  
-  # convert to rates of change
-  # if you do not want to limit log rates of change to [-1,1] (LPI default) set limiter=FALSE
-  views_lambdas_list <- species_lambdas_fn(views_gammed,
-                                           limiter=TRUE)
-
-  # convert list of lambdas to data frame
-  views_lambdas_dataframe <- do.call(rbind, views_lambdas_list)
-  
-  return(views_lambdas_dataframe)
-  
-}
-
 SAI_trends <- list()
 
 # iterate through each class/lamgauge combo
@@ -137,4 +105,3 @@ stopCluster(cl)
 saveRDS(SAI_trends, paste(working_dir, "outputs/species_trends_updated_2.rds", sep = ""))
 
 write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_1.csv")
-

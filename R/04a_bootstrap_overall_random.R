@@ -14,6 +14,9 @@ library(ggplot2)
 # set working directory for base corr
 working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
 
+# source the functions R script
+source(paste(working_dir, "R/00_functions.R", sep = ""))
+
 # read in the random view trends
 language_views <- readRDS(paste(working_dir, "outputs/random_trends_updated.rds", sep = ""))
 
@@ -27,33 +30,6 @@ date_vec <- c(colnames(language_views[[1]][,2:ncol(language_views[[1]])]))
 
 # set up language vector
 language_vec <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en")
-
-# Function to calculate index from lambdas selected by 'ind'
-create_lpi <- function(lambdas, ind = 1:nrow(lambdas)) {
-
-  # select columns from lambda file to calculate mean, and build a cumprod trend
-  lambda_data <- lambdas[, 3:ncol(lambdas)]
-  this_lambdas <- lambda_data[ind, ]
-  mean_ann_lambda <- colMeans(this_lambdas, na.rm = TRUE)
-  trend <- cumprod(10^c(0, mean_ann_lambda))
-
-  return(trend)
-}
-
-# function for boostrapping the create_lpi function for each lambda, and generating a 95 % confidence interval
-run_each_group <- function(lambda_files, random_trend){
-  
-  # Bootstrap these to get confidence intervals
-  dbi.boot <- boot(lambda_files, create_lpi, R = 1000)
-  
-  print(dbi.boot)
-  
-  # Construct dataframe and get mean and 95% intervals
-  boot_res <- data.frame("LPI" = dbi.boot$t0, "Year" = random_trend[0:length(dbi.boot$t0)])
-  boot_res$LPI_upr <- apply(dbi.boot$t, 2, quantile, probs = c(0.975)) 
-  boot_res$LPI_lwr <- apply(dbi.boot$t, 2, quantile, probs = c(0.025))
-  return(boot_res)
-}
 
 # run the boostrapping of trends for each lambda, and adjust for the random of that language
 lpi_trends_adjusted <- list()
