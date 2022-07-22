@@ -18,10 +18,13 @@ library(aws.s3)
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
 s3BucketName <- "speciesawarenessindex"
 
+# set working directory for base corr
+working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+
 # read in each of the secret keys hosted online
-AWS_ACCESS_KEY_ID <- read.table("R/app/AWS_ACCESS_KEY_ID.txt")
-AWS_SECRET_ACCESS_KEY <- read.table("R/app/AWS_SECRET_ACCESS_KEY.txt")
-AWS_DEFAULT_REGION <- read.table("R/app/AWS_DEFAULT_REGION.txt")
+AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))
+AWS_SECRET_ACCESS_KEY <- read.table(paste(working_dir, "R/app/AWS_SECRET_ACCESS_KEY.txt", sep = ""))
+AWS_DEFAULT_REGION <- read.table(paste(working_dir, "R/app/AWS_DEFAULT_REGION.txt", sep = ""))
 
 # set system environment for each of AWS keys
 Sys.setenv("AWS_ACCESS_KEY_ID" = AWS_ACCESS_KEY_ID,
@@ -160,11 +163,11 @@ for(i in 1:length(avg_lambdas)){
 # bind all the lambda files into a single dataframe into a single dataframe
 final_bound <- list()
 for(i in 1:length(avg_lambdas)){
-  final_bound[[i]] <- rbindlist(avg_lambdas[[i]])
+  final_bound[[i]] <- rbindlist(avg_lambdas[[i]], use.names = TRUE)
 }
 
 # rbind together the final dataframes
-final_bound <- rbindlist(final_bound) %>%
+final_bound <- rbindlist(final_bound, use.names = TRUE) %>%
   mutate(taxa = factor(taxa)) %>%
   mutate(language = factor(language)) %>%
   rename("q_wikidata" = "data_file[, 1]")
