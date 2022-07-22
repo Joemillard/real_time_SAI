@@ -14,6 +14,25 @@ library(data.table)
 # set up cores for parallel processing
 cl <- makeCluster(detectCores())
 
+# read in packages and data for each parallel session
+clusterEvalQ(cl, {
+  
+  # set extra library path fro when running from Python
+  .libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
+  
+  # set working directory for each cluster
+  working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+  
+  # set up the packages required
+  library(dplyr)
+  library(data.table)
+  library(mgcv)
+  
+  # read in additional functions
+  source(paste(working_dir, "R/00_functions.R", sep = ""))
+  
+})
+
 # set working directory for base corr
 working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
 
@@ -44,9 +63,9 @@ average_daily_views_real_time_agg <- list()
 for(i in 1:length(languages)){
   for(j in 1:length(taxa_ls)){
   average_daily_views_real_time[[j]] <- lapply(paste(working_dir, "data/real_time_views/species_views/",
-                                                   grep(taxa_ls[j], list.files("data/real_time_views/species_views", pattern = languages[i]), value = TRUE), sep = ""), FUN = read.csv) %>%
-    rbindlist() %>%
-    select(-ï..) %>%
+                                                   grep(taxa_ls[j], list.files(paste(working_dir, "data/real_time_views/species_views", sep = ""), pattern = languages[i]), value = TRUE), sep = ""), FUN = read.csv) %>%
+    rbindlist(use.names = TRUE) %>%
+    select(-1) %>%
     mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
     select(article, q_wikidata, year, month, av_views, date) %>%
     mutate(year = as.character(year)) %>%
@@ -64,25 +83,6 @@ for(i in 1:length(average_daily_views_new)){
       filter(!is.na(date))
   }
 }
-
-# read in packages and data for each parallel session
-clusterEvalQ(cl, {
-  
-  # set extra library path fro when running from Python
-  .libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
-  
-  # set working directory for each cluster
-  working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
-  
-  # set up the packages required
-  library(dplyr)
-  library(data.table)
-  library(mgcv)
-  
-  # read in additional functions
-  source(paste(working_dir, "R/00_functions.R", sep = ""))
-
-})
 
 # set up the function for calculating trends
 run_SAI_change <- function(views){
@@ -124,16 +124,16 @@ SAI_trends <- list()
 # iterate through each class/lamgauge combo
 system.time({
   for(i in 1:length(average_daily_views_new)){
-  
+
     SAI_trends[[i]] <- parLapply(cl, average_daily_views_new[[i]], fun = run_SAI_change)
     
     print(i)
   
   }
 })
- 
-stopCluster(cl)
 
+stopCluster(cl)
+ 
 saveRDS(SAI_trends, paste(working_dir, "outputs/species_trends_updated_2.rds", sep = ""))
 
 write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_1.csv")
