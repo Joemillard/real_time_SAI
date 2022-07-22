@@ -18,10 +18,13 @@ library(aws.s3)
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
 s3BucketName <- "speciesawarenessindex"
 
+# set working directory for base corr
+working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+
 # read in each of the secret keys hosted online
-AWS_ACCESS_KEY_ID <- read.table("R/app/AWS_ACCESS_KEY_ID.txt")
-AWS_SECRET_ACCESS_KEY <- read.table("R/app/AWS_SECRET_ACCESS_KEY.txt")
-AWS_DEFAULT_REGION <- read.table("R/app/AWS_DEFAULT_REGION.txt")
+AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))
+AWS_SECRET_ACCESS_KEY <- read.table(paste(working_dir, "R/app/AWS_SECRET_ACCESS_KEY.txt", sep = ""))
+AWS_DEFAULT_REGION <- read.table(paste(working_dir, "R/app/AWS_DEFAULT_REGION.txt", sep = ""))
 
 # set system environment for each of AWS keys
 Sys.setenv("AWS_ACCESS_KEY_ID" = AWS_ACCESS_KEY_ID,
@@ -172,12 +175,12 @@ for(i in 1:length(smoothed_adjusted_lamda)){
   }
   
   # bind together the trends for that language
-  bound_trends[[i]] <- rbindlist(lpi_trends_adjusted) %>%
+  bound_trends[[i]] <- rbindlist(lpi_trends_adjusted, use.names = TRUE) %>%
     mutate(language = languages[i])
 }
 
 # bind together the trend for all languages
-fin_bound_trends <- rbindlist(bound_trends)
+fin_bound_trends <- rbindlist(bound_trends, use.names = TRUE)
 
 # amend data frame for plotting
 class_language <- fin_bound_trends %>% 
