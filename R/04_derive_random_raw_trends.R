@@ -34,9 +34,9 @@ average_daily_views_real_time <- list()
 # read in each of the new real-time files
 for(i in 1:length(languages)){
     average_daily_views_real_time[[i]] <- lapply(paste(working_dir, "data/real_time_views/random_views/",
-                                                            list.files("data/real_time_views/random_views", pattern = languages[i]), sep = ""), FUN = read.csv) %>%
-      rbindlist() %>%
-      select(-ï..) %>%
+                                                       list.files(paste(working_dir, "data/real_time_views/random_views/", sep = ""), pattern = languages[i]), sep = ""), FUN = read.csv) %>%
+      rbindlist(use.names = TRUE) %>%
+      select(-1) %>%
       mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
       select(article, q_wikidata, year, month, av_views, date) %>%
       mutate(year = as.character(year)) %>%
