@@ -251,19 +251,23 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                    tabPanel("TRENDS", value = "TRENDS",
                             fluidRow(
                               column(6,
-                                     plotOutput("overall_SAI"),
+                                     shinycssloaders::withSpinner(
+                                        plotOutput("overall_SAI")),
                                      h6(style = "text-align: justify;", paste("Figure 1. The overall species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, French, German, Italian, Japanese, Portuguese, Russian, and Spanish, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
                               
                               column(6,
-                                     plotOutput("class_SAI"),
+                                     shinycssloaders::withSpinner(
+                                        plotOutput("class_SAI")),
                                      h6(style = "text-align: justify;", paste("Figure 2. The species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish separated by taxonomic by class, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles)."))),
                             br(),
                             fluidRow(
                               column(6,
-                                     plotOutput("class_language_SAI"),
+                                     shinycssloaders::withSpinner(
+                                        plotOutput("class_language_SAI")),
                                      h6(style = "text-align: justify;", paste("Figure 3. The species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages for July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
                               column(6,
-                                     plotOutput("class_language_change"),
+                                     shinycssloaders::withSpinner(
+                                        plotOutput("class_language_change")),
                                      h6(style = "text-align: justify;", paste("Figure 4. Average monthly rate of change for the species page species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages, for the period January 2016-", format(as.Date(tail(overall_SAI$Year[grepl("-01-", overall_SAI$Year)], 1)), "%B %Y"), sep = ""), "(error bars, predicted values of a linear model, fitting average monthly change in the species page SAI as a function of taxonomic class, Wikipedia language, and their interaction). Fitted values are from the linear model with the R function predict (points), and 95% CIs are from the fitted values ± 1.96 multiplied by the SE."))
                             )), # Closes About tab,
                    tabPanel("DATA", value = "DATA",
