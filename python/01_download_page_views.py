@@ -1,5 +1,10 @@
 # script for retrieving views from IUCN species object and random page object
 
+from hanging_threads import start_monitoring
+start_monitoring(seconds_frozen=10, test_interval=100)
+
+
+import sys
 import requests
 import time
 import pandas as pd
@@ -8,6 +13,12 @@ from pandas.io.json import json_normalize
 import datetime
 from datetime import date
 from subprocess import Popen, PIPE
+
+# set recursion limit
+sys.setrecursionlimit(10**9)
+
+# set relative directory
+working_dir = "C:/Users/josem4/Documents/real_time_SAI/"
 
 if __name__ == "__main__":
 	###
@@ -24,8 +35,8 @@ if __name__ == "__main__":
 	taxa_ls = ['ACTINOPTERYGII', 'AMPHIBIA', 'AVES', 'INSECTA', 'MAMMALIA', 'REPTILIA', 'RANDOM']
 
 	# Load and prepare wikipedia page info
-	pages = pd.read_csv("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/data/all_iucn_titles.csv")
-	random_pages = pd.read_csv("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/data/random_pages_11000.csv")
+	pages = pd.read_csv(working_dir + "data/all_iucn_titles.csv")
+	random_pages = pd.read_csv(working_dir + "data/random_pages_11000.csv")
 
 	# Subset spp pages to languages of interest
 	wiki_langs = [lang + "wiki" for lang in languages] 
@@ -63,7 +74,7 @@ if __name__ == "__main__":
 	last_month_strt_f = last_month_strt.strftime("%Y%m%d")
 
 	## Load current sai from the aws
-	overall_SAI = pd.read_csv("C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/outputs/overall_2.csv")
+	overall_SAI = pd.read_csv(working_dir + "outputs/overall_2.csv")
 	overall_SAI["Year_alt"] = overall_SAI.Year.replace("-", "", regex=True).astype(int)     
 
 	# Get last month of SAI monitoring data
@@ -99,16 +110,20 @@ if __name__ == "__main__":
 			# for each page
 			for i in range(0, pages_tmp.shape[0]):
 				if i% 100 == 0:
-					 print(i)
+					print(i)
 				try:
 					title = pages_tmp.title[i]
 					title = title.replace(" ", "_")
-					tmp_q_wiki = pages_tmp.q_wikidata[i] 
-					
+					tmp_q_wiki = pages_tmp.q_wikidata[i]
+
+					#print("01")
+
 					# Retrieve page views for URL
 					URL = "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/%s.wikipedia.org/all-access/user/%s/daily/%s/%s" % (lang, title, last_month_strt_f, last_month_end_f)
 
-					R = S.get(url = URL, headers = headers)
+					R = S.get(url = URL, headers = headers, timeout = 20)
+
+					#print("02")
 
 					# clean up json file
 					DATA = R.json()
@@ -148,6 +163,8 @@ if __name__ == "__main__":
 				# in event that blocked from api, wait for 5 minutes before rretrying
 				except IOError:
 					time.sleep(300)
+
+					# f = open(working_dir + "one_api_error.txt", "w")
 
 					# then retry
 					try:
@@ -191,7 +208,9 @@ if __name__ == "__main__":
 					# in event that blocked from api, insert error row 
 					# only if 2 connection errors do we skip row...
 					except IOError:
-						
+
+                                               #  f = open(working_dir + "two_api_error.txt", "w")
+
 						df = pd.DataFrame({'article' : [title], 'year': [''], 'month': [''], 'q_wikidata': [tmp_q_wiki],'av_views': [np.nan]})
 						
 						result.append(df)
@@ -203,18 +222,18 @@ if __name__ == "__main__":
 
 				# concatenate all appended results to dataframe and write to csv for each subset
 				final = pd.concat(result).reset_index(drop = True)
-				save_loc = 'C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/data/real_time_views/species_views/%s_%s_user_trends_%s_%s.csv' % (lang, taxa_string, last_month_strt_f, last_month_end_f) # Home PC
+				save_loc = working_dir + 'data/real_time_views/species_views/%s_%s_user_trends_%s_%s.csv' % (lang, taxa_string, last_month_strt_f, last_month_end_f) # Home PC
 				final.to_csv(save_loc, sep = ',', encoding = 'utf-8-sig')
 
 			# if the taxa is the random group, needs to be saved in the random_views folder
 			else:
 				# concatenate all appended results to dataframe and write to csv for each subset
 				final = pd.concat(result).reset_index(drop = True)
-				save_loc = 'C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/data/real_time_views/random_views/%s_%s_user_trends_%s_%s.csv' % (lang, taxa_string, last_month_strt_f, last_month_end_f) # Home PC
+				save_loc = working_dir + 'data/real_time_views/random_views/%s_%s_user_trends_%s_%s.csv' % (lang, taxa_string, last_month_strt_f, last_month_end_f) # Home PC
 				final.to_csv(save_loc, sep = ',', encoding = 'utf-8-sig')  
 
 # run command for calling R from Python, with error capture -- 03_derive_species_raw_trends.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/03_derive_species_raw_trends.R"]
+cmd = ["C:/Program Files/R/R-4.2.1/bin/Rscript", working_dir + "R/03_derive_species_raw_trends.R"]
 p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 output, error = p.communicate()
 		  
@@ -222,7 +241,7 @@ print('R OUTPUT:\n {0}'.format(output))
 print('R ERROR:\n {0}'.format(error))
 
 # run command for calling R from Python, with error capture -- 04_derive_random_raw_trends.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04_derive_random_raw_trends.R"]
+cmd = ["C:/Program Files/R/R-4.2.1/bin/Rscript", working_dir + "R/04_derive_random_raw_trends.R"]
 p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 output, error = p.communicate()
 		  
@@ -230,7 +249,7 @@ print('R OUTPUT:\n {0}'.format(output))
 print('R ERROR:\n {0}'.format(error))
 
 # run command for calling R from Python, with error capture -- 04a_bootstrap_overall_random.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/04a_bootstrap_overall_random.R"]
+cmd = ["C:/Program Files/R/R-4.2.1/bin/Rscript", working_dir + "R/04a_bootstrap_overall_random.R"]
 p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 output, error = p.communicate()
 		  
@@ -238,7 +257,7 @@ print('R OUTPUT:\n {0}'.format(output))
 print('R ERROR:\n {0}'.format(error))
 
 # run command for calling R from Python, with error capture -- 05_class_language_SAI.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/05_class_language_SAI.R"]
+cmd = ["C:/Program Files/R/R-4.2.1/bin/Rscript", working_dir + "R/05_class_language_SAI.R"]
 p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 output, error = p.communicate()
 		  
@@ -246,7 +265,7 @@ print('R OUTPUT:\n {0}'.format(output))
 print('R ERROR:\n {0}'.format(error))
 
 # run command for calling R from Python, with error capture -- 06_taxa_language_SAI_model.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/06_taxa_language_SAI_model.R"]
+cmd = ["C:/Program Files/R/R-4.2.1/bin/Rscript", working_dir + "R/06_taxa_language_SAI_model.R"]
 p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 output, error = p.communicate()
 		  
@@ -254,7 +273,7 @@ print('R OUTPUT:\n {0}'.format(output))
 print('R ERROR:\n {0}'.format(error)) 
 
 # run command for calling R from Python, with error capture -- 07_class_SAI.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/07_class_SAI.R"]
+cmd = ["C:/Program Files/R/R-4.2.1/bin/Rscript", working_dir + "R/07_class_SAI.R"]
 p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 output, error = p.communicate()
 		  
@@ -262,7 +281,7 @@ print('R OUTPUT:\n {0}'.format(output))
 print('R ERROR:\n {0}'.format(error))
 
 # run command for calling R from Python, with error capture -- 08_overall_SAI.R
-cmd = ["C:/Program Files/R/R-4.1.2/bin/Rscript", "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/R/08_overall_SAI.R"]
+cmd = ["C:/Program Files/R/R-4.2.1/bin/Rscript", working_dir + "R/08_overall_SAI.R"]
 p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 output, error = p.communicate()
 		  
