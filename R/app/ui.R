@@ -315,7 +315,7 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                          is represented by page-view trends in up to 10 languages, controlled for overall change in page-views 
                                                          for that wikipedia language ")), 
                                              tags$p(h6("Please tick the box below to agree to our data-use agreement and access the data: "), 
-                                                    tags$a(href="data_agreement_2020.pdf", "data_agreement_2020.pdf")),
+                                                    tags$a(href="SAI_data_agreement_2022.pdf", "SAI_data_agreement_2022.pdf")),
                                              checkboxInput("download_check",
                                                            label = "Agree"
                                              ),
