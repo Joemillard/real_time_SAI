@@ -80,11 +80,6 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                             # PAGE BREAK
                             tags$hr(),
                             
-                            # REport cover
-                            fluidRow(
-                              
-                              style = "height:50px;"),
-                            
                             fluidRow(
                               column(4),
                               column(2,
