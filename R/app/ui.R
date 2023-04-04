@@ -327,17 +327,17 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                               
                                                               br(),
                                                               
-                                                              tags$p(h6("To download the data behind the class-level SAI click below.")),
+                                                              tags$p(h6("Click on the button below to download the class-level SAI.")),
                                                               downloadButton("class_SAI_dl", label = "Download 2"),
                                                               
                                                               br(),
                                                               
-                                                              tags$p(h6("To download data for SAIs per class and language, use the button below.")),
+                                                              tags$p(h6("Click on the button below to download the SAI trends per class and language.")),
                                                               downloadButton("class_language_dl", label = "Download 3"),
                                                               
                                                               br(),
                                                               
-                                                              tags$p(h6("The averge monthly change in SAI per class and language cn be downloaded here.")),
+                                                              tags$p(h6("Click on the button below to download the averge monthly change in SAI per class and language.")),
                                                               downloadButton("class_language_change_dl", label = "Download 4")
                                              )
                                              
