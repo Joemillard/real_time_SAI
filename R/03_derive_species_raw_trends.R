@@ -21,7 +21,7 @@ clusterEvalQ(cl, {
   .libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
   
   # set working directory for each cluster
-  working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+  working_dir <- "C:/Users/josem4/Documents/real_time_SAI/"
   
   # set up the packages required
   library(dplyr)
@@ -34,7 +34,7 @@ clusterEvalQ(cl, {
 })
 
 # set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+working_dir <- "C:/Users/josem4/Documents/real_time_SAI/"
 
 # source the functions R script
 source(paste(working_dir, "R/00_functions.R", sep = ""))
@@ -104,4 +104,4 @@ stopCluster(cl)
  
 saveRDS(SAI_trends, paste(working_dir, "outputs/species_trends_updated_2.rds", sep = ""))
 
-write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_1.csv")
+write.csv(data.frame(x = 1), paste(working_dir, "blah_1.csv"))

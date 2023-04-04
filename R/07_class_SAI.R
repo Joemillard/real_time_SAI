@@ -3,14 +3,10 @@
 # set extra library path fro when running from Python
 .libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1"))
 
-# set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
-
 # potentially add script to separate between smoothed and non-smoothed lambdas
 # read in required packages
 library(data.table)
 library(dplyr)
-library(ggplot2)
 library(boot)
 library(forcats)
 library(aws.s3)
@@ -19,7 +15,7 @@ library(aws.s3)
 s3BucketName <- "speciesawarenessindex"
 
 # set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+working_dir <- "C:/Users/josem4/Documents/real_time_SAI/"
 
 # read in each of the secret keys hosted online
 AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))
@@ -148,5 +144,5 @@ class_trend <- rbindlist(lpi_trends_adjusted, use.names = TRUE) %>%
 #saveRDS(class_trend, paste(working_dir, "outputs/shiny_outputs/class_trend_2.rds", sep = ""))
 s3write_using(class_trend, FUN = saveRDS, object = "class_trend_2.rds", bucket = s3BucketName)
 
-write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_6.csv")
+write.csv(data.frame(x = 1), paste(working_dir, "blah_6.csv"))
 

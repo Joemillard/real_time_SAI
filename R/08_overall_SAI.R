@@ -3,21 +3,17 @@
 .libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
 
 # set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+working_dir <- "C:/Users/josem4/Documents/real_time_SAI/"
 
 # read in required packages
 library(data.table)
 library(dplyr)
-library(ggplot2)
 library(boot)
 library(forcats)
 library(aws.s3)
 
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
 s3BucketName <- "speciesawarenessindex"
-
-# set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
 
 # read in each of the secret keys hosted online
 AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))
@@ -125,4 +121,4 @@ lpi_trends_adjusted <- lpi_trends_adjusted %>%
 write.csv(lpi_trends_adjusted, paste(working_dir, "outputs/overall_2.csv", sep = ""), row.names=FALSE)
 s3write_using(lpi_trends_adjusted, FUN = saveRDS, object = "overall_2.rds", bucket = s3BucketName)
 
-write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_7.csv")
+write.csv(data.frame(x = 1), paste(working_dir, "blah_7.csv"))

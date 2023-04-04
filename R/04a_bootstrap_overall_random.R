@@ -12,7 +12,7 @@ library(boot)
 library(ggplot2)
 
 # set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+working_dir <- "C:/Users/josem4/Documents/real_time_SAI/"
 
 # source the functions R script
 source(paste(working_dir, "R/00_functions.R", sep = ""))
@@ -48,5 +48,5 @@ for(i in 1:length(language_views)){
 # resave the average lambda for random views, according to bootstrap method used throughout
 saveRDS(lpi_trends_adjusted, paste(working_dir, "outputs/overall_random_updated_2.rds", sep = ""))
 
-write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_3.csv")
+write.csv(data.frame(x = 1), paste(working_dir, "blah_3.csv"))
 

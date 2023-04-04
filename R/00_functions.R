@@ -246,7 +246,7 @@ run_SAI_change <- function(views){
   views_wide <- tidyr::pivot_wider(views, 
                                    names_from = c(year, month), 
                                    values_from = av_views, 
-                                   id_cols=c(year, month, av_views, q_wikidata))
+                                   id_cols=c(q_wikidata))
   
   # remove any rows with NA and add 1 for following function
   views_wide <- views_wide[complete.cases(views_wide), ]

@@ -4,7 +4,7 @@
 .libPaths(c( .libPaths(), "C:/Users/Joseph Millard/Documents/R/win-library/4.1") )
 
 # set working directory for base corr
-working_dir <- "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/"
+working_dir <- "C:/Users/josem4/Documents/real_time_SAI/"
 
 # potentially add script to separate between smoothed and non-smoothed lambdas
 # read in required packages
@@ -127,5 +127,5 @@ class_language <- fin_bound_trends %>%
 #saveRDS(class_language, paste(working_dir, "outputs/shiny_outputs/class_language_2.rds", sep = ""))
 s3write_using(class_language, FUN = saveRDS, object = "class_language_2.rds", bucket = s3BucketName)
 
-write.csv(data.frame(x = 1), "C:/Users/Joseph Millard/Documents/PhD/Aims/Aim 3 - quantifying pollinator cultural value/real_time_SAI/blah_4.csv")
+write.csv(data.frame(x = 1), paste(working_dir, "blah_4.csv"))
 
