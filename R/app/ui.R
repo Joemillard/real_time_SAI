@@ -25,7 +25,7 @@ panel_div <- function(class_type, content) {
   )
 }
 
-shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = "navBar",
+shinyUI(navbarPage(title=div(tags$a(href="", "")), id = "navBar",
                    theme = "paper.css",
                    collapsible = TRUE,
                    inverse = TRUE,
