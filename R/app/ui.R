@@ -81,17 +81,6 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                             tags$hr(),
                             
                             # REport cover
-                            fluidRow(style="text-align: center; margin: auto; width: 60%;", 
-                                     img(src="overall_SAI.png", width="600px", align = "center"),
-                                     HTML("<h5><center>Our overall awareness of biodiversity is marginally increasing, although
-                                                 there are differences among taxonomic classes and languages, see "), tags$a("trends", onclick="fakeClick('TRENDS')"), HTML("</center></h5>"),
-                                     p(),
-                                     HTML("<h6><center>The global trend represents "), tags$strong("41,197"), HTML(" IUCN species (amphibians, birds, 
-                                                 insects, mammals, ray-finned fishes, and reptiles) across "), tags$strong("10 Wikipedia 
-                                                 languages"), HTML(" (Arabic, Chinese, English, French, German, Italian, Japanese, 
-                                                 Portuguese, Russian, Spanish) and over "), tags$strong("4 billion page-views"), HTML(".</center></h6>")
-                            ),
-                            
                             fluidRow(
                               
                               style = "height:50px;"),
@@ -107,7 +96,7 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                               ),
                               column(2,
                                      tags$div(align = "center", 
-                                              tags$a("Trends by Taxonomic group", 
+                                              tags$a("Explore the data", 
                                                      onclick="fakeClick('TRENDS')", 
                                                      class="btn btn-primary btn-lg")
                                      )
@@ -337,7 +326,7 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                               
                                                               br(),
                                                               
-                                                              tags$p(h6("Click on the button below to download the averge monthly change in SAI per class and language.")),
+                                                              tags$p(h6("Click on the button below to download the average monthly change in SAI per class and language.")),
                                                               downloadButton("class_language_change_dl", label = "Download 4")
                                              )
                                              
