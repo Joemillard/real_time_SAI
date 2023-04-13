@@ -2,7 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
-/token.txt
 
+/token.txt
 /data
 /outputs
+R/app/AWS_ACCESS_KEY_ID.txt
+R/app/AWS_SECRET_ACCESS_KEY.txt
+R/app/AWS_DEFAULT_REGION.txt
