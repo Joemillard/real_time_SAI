@@ -19,7 +19,7 @@ library(aws.s3)
 source(paste(working_dir, "R/00_functions.R", sep = ""))
 
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
-s3BucketName <- "speciesawarenessindex"
+s3BucketName <- "speciesawarenessindex-new"
 
 # read in each of the secret keys hosted online
 AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))

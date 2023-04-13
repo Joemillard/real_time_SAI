@@ -12,7 +12,7 @@ library(forcats)
 library(aws.s3)
 
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
-s3BucketName <- "speciesawarenessindex"
+s3BucketName <- "speciesawarenessindex-new"
 
 # set working directory for base corr
 working_dir <- "C:/Users/josem4/Documents/real_time_SAI/"
