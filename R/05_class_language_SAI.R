@@ -62,7 +62,9 @@ for(i in 1:length(random_trend)){
 }
 
 # string for pollinating classes, plus random
-classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
+classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", 
+             'magnoliopsida', 'liliopsida', 'pinopsida', 'cycadopsida', 'polypodiopsida', 'gnetopsida',
+             "random_data")
 
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()
@@ -92,7 +94,8 @@ for(i in 1:length(all_lambdas)){
 # reassign correct names for each element in list
 names(smoothed_adjusted_lamda) <- c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en") 
 for(i in 1:length(smoothed_adjusted_lamda)){
-  names(smoothed_adjusted_lamda[[i]]) <- (c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia"))
+  names(smoothed_adjusted_lamda[[i]]) <- (c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia",
+                                            "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida"))
 }
 
 # run the boostrapping of trends for each lambda
@@ -118,8 +121,10 @@ class_language <- fin_bound_trends %>%
   mutate(Year = paste(Year, "_01", sep = "")) %>%
   mutate(Year = gsub("X", "", Year)) %>%
   mutate(Year = as.Date(Year, "%Y_%m_%d")) %>%
-  mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia"),
-                       labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians"))) %>%
+  mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia", 
+                                        "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida"),
+                       labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians",
+                                  "Magnoliopsida", "Liliopsida", "Pinopsida", "Cycadopsida", "Polypodiopsida", "Gnetopsida"))) %>%
   mutate(language = factor(language, levels = c("ar", "zh", "en", "fr", "de", "it", "ja", "pt", "ru", "es"),
                            labels = c("Arabic", "Chinese", "English", "French", "German", "Italian", "Japanese", "Portuguese", "Russian", "Spanish")))
 

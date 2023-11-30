@@ -58,7 +58,8 @@ for(i in 1:length(random_trend)){
 }
 
 # string for pollinating classes, plus random
-classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
+classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", 
+             "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida", "random_data")
 
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()
@@ -138,8 +139,10 @@ class_trend <- rbindlist(lpi_trends_adjusted, use.names = TRUE) %>%
   mutate(Year = paste(Year, "_01", sep = "")) %>%
   mutate(Year = gsub("X", "", Year)) %>%
   mutate(Year = as.Date(Year, "%Y_%m_%d")) %>%
-  mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia"),
-                       labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians")))
+  mutate(taxa = factor(taxa, levels = c("reptilia", "actinopterygii", "mammalia", "aves", "insecta", "amphibia",
+                                        "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida"),
+                       labels = c("Reptiles", "Ray finned fishes", "Mammals", "Birds", "Insects", "Amphibians",
+                                  "Magnoliopsida", "Liliopsida", "Pinopsida", "Cycadopsida", "Polypodiopsida", "Gnetopsida")))
   
 #saveRDS(class_trend, paste(working_dir, "outputs/shiny_outputs/class_trend_2.rds", sep = ""))
 s3write_using(class_trend, FUN = saveRDS, object = "class_trend_2.rds", bucket = s3BucketName)

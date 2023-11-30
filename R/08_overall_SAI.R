@@ -56,7 +56,9 @@ for(i in 1:length(random_trend)){
 }
 
 # string for pollinating classes, plus random
-classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
+classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", 
+             "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida",
+             "random_data")
 
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()

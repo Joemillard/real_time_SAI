@@ -58,7 +58,9 @@ for(i in 1:length(random_trend)){
 }
 
 # string for pollinating classes, plus random
-classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
+classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", 
+             "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida",
+             "random_data")
 
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()
@@ -131,8 +133,10 @@ fin_frame_6 <- final_bound_interaction %>%
 
 # add labels for factors, sort by predicted value for language and class, and then plot
 class_language_models <- fin_frame_6 %>%
-  mutate(taxa = factor(taxa, levels = c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia"),
-                                  labels = c("Ray finned fishes", "Amphibians", "Birds", "Insects", "Mammals", "Reptiles"))) %>%
+  mutate(taxa = factor(taxa, levels = c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia",
+                                        "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida"),
+                                  labels = c("Ray finned fishes", "Amphibians", "Birds", "Insects", "Mammals", "Reptiles",
+                                             "Magnoliopsida", "Liliopsida", "Pinopsida", "Cycadopsida", "Polypodiopsida", "Gnetopsida"))) %>%
   mutate(language = factor(language, levels = c("ar", "fr", "zh", "en", "de", "es", "it", "ja", "pt" , "ru"),
                            labels = c("Arabic", "French", "Chinese", "English", "German", "Spanish", "Italian", "Japanese", "Portuguese", "Russian"))) %>%
   mutate(taxa = fct_reorder(taxa, -predicted_values, median)) %>%

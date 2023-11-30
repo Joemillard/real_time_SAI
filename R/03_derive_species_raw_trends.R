@@ -56,7 +56,8 @@ for(i in 1:length(average_daily_views_new)){
 languages <- c('^es_', '^fr_', '^de_', '^ja_', '^it_', '^ar_', '^ru_', '^pt_', '^zh_', '^en_')
 
 #taxa of interest
-taxa_ls <- c('actinopterygii', 'amphibia', 'aves', 'insecta', 'mammalia', 'reptilia')
+taxa_ls <- c('actinopterygii', 'amphibia', 'aves', 'insecta', 'mammalia', 'reptilia', 
+             'magnoliopsida', 'liliopsida', 'pinopsida', 'cycadopsida', 'polypodiopsida', 'gnetopsida')
 
 # read in all the files for the real-time downloads
 average_daily_views_real_time <- list()
