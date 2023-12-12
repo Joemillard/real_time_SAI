@@ -66,6 +66,9 @@ average_daily_views_real_time_agg <- list()
 # read in each of the new real-time files, binding multiple reads of each taxa/language combination for multiple months
 for(i in 1:length(languages)){
   for(j in 1:length(taxa_ls)){
+    
+    tryCatch({
+    
   average_daily_views_real_time[[j]] <- lapply(paste(working_dir, "data/real_time_views/species_views/",
                                                    grep(taxa_ls[j], list.files(paste(working_dir, "data/real_time_views/species_views", sep = ""), pattern = languages[i]), value = TRUE), sep = ""), FUN = read.csv) %>%
     rbindlist(use.names = TRUE) %>%
@@ -74,10 +77,17 @@ for(i in 1:length(languages)){
     select(article, q_wikidata, year, month, av_views, date) %>%
     mutate(year = as.character(year)) %>%
     mutate(month = as.character(substr(date, start = 6, stop = 7)))
+  
+  }, error = function(x) print(paste(languages[i], taxa_ls[j], sep = " ")))
   }
   
   average_daily_views_real_time_agg[[i]] <- average_daily_views_real_time
   
+}
+
+# increase size of the older view download as free slots for plants
+for(i in 1:length(average_daily_views_new)){
+  average_daily_views_new[[i]] <- c(average_daily_views_new[[i]], list(data.frame(), data.frame(), data.frame(), data.frame(), data.frame(), data.frame()))
 }
 
 # bind together all the real time data with the old view data, and filter out NA timestamps
