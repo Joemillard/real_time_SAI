@@ -2,7 +2,7 @@
 library(aws.s3)
 
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
-s3BucketName <- "speciesawarenessindex-new"
+s3BucketName <- "speciesawarenessindex-rc"
 
 # read in each of the secret keys hosted online
 AWS_ACCESS_KEY_ID <- read.table("AWS_ACCESS_KEY_ID.txt")
