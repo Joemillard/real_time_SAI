@@ -132,7 +132,10 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                        
                                              tags$p(h6(style="text-align: justify;", "SAI v2.0 updates automatically each month, with the most recent data underpinning the index made available for download at any given time here. In developing a real-time version of the SAI, the core pipeline has now undergone a full rebuild, thereby transitioning it away from the rLPI R package on which it was originally built (all code is available on GitHub here). V2.0 demonstrates how conservation culturomics metrics represent an ideal candidate for the development of real-time biodiversity monitoring platforms (see our preprint here).")),
                                                        
-                                             tags$p(h6(style="text-align: justify;", "Our hope is that through an online and open portal of changing species awareness, we can help facilitate research to better understand interest in biodiversity online."))
+                                             tags$p(h6(style="text-align: justify;", "Our hope is that through an online and open portal of changing species awareness, we can help facilitate research to better understand interest in biodiversity online.")),
+                                             
+                                             tags$p(h6(style="text-align: justify;", "NOTE: Please note that as of April 2024 due to a lack of funding automated updates on this site were discontinued."))
+                                             
                                          )
                                      )
                               ),
