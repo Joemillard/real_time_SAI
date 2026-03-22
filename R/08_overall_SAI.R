@@ -13,7 +13,7 @@ library(forcats)
 library(aws.s3)
 
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
-s3BucketName <- "speciesawarenessindex"
+s3BucketName <- "speciesawarenessindex-rc"
 
 # read in each of the secret keys hosted online
 AWS_ACCESS_KEY_ID <- read.table(paste(working_dir, "R/app/AWS_ACCESS_KEY_ID.txt", sep = ""))
@@ -56,7 +56,9 @@ for(i in 1:length(random_trend)){
 }
 
 # string for pollinating classes, plus random
-classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", "random_data")
+classes <- c("actinopterygii", "amphibia", "aves", "insecta", "mammalia", "reptilia", 
+             "magnoliopsida", "liliopsida", "pinopsida", "cycadopsida", "polypodiopsida", "gnetopsida",
+             "random_data")
 
 # adjust the lambdas for each species for each language with random
 adj_lambdas <- list()

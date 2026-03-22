@@ -54,7 +54,8 @@ for(i in 1:length(average_daily_views_new)){
 
 # set up vectors of wiki project class to remove any animal species from the random data
 wiki_proj <- paste(c("es", "fr", "de", "ja", "it", "ar", "ru", "pt", "zh", "en"), "wiki", sep = "")
-taxa_groups <- c("ACTINOPTERYGII", "AMPHIBIA", "AVES", "INSECTA", "MAMMALIA", "REPTILIA")
+taxa_groups <- c("ACTINOPTERYGII", "AMPHIBIA", "AVES", "INSECTA", "MAMMALIA", "REPTILIA",
+                 "MAGNOLIOPSIDA", "LILIOPSIDA", "PINOPSIDA", "CYCADOPSIDA", "POLYPODIOPSIDA", "GNETOPSIDA")
 
 # read in the biodiversity pages
 biodiversity_pages <- read.csv(paste(working_dir, "data/all_iucn_titles.csv", sep = ""), encoding = "UTF-8") %>%

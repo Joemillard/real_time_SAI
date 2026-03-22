@@ -2,7 +2,7 @@
 library(aws.s3)
 
 # each of these csv reads needd to be replaced by a call to AWS, eventually to SQL database
-s3BucketName <- "speciesawarenessindex"
+s3BucketName <- "speciesawarenessindex-rc"
 
 # read in each of the secret keys hosted online
 AWS_ACCESS_KEY_ID <- read.table("AWS_ACCESS_KEY_ID.txt")
@@ -25,7 +25,7 @@ panel_div <- function(class_type, content) {
   )
 }
 
-shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = "navBar",
+shinyUI(navbarPage(title=div(tags$a(href="", "")), id = "navBar",
                    theme = "paper.css",
                    collapsible = TRUE,
                    inverse = TRUE,
@@ -80,22 +80,6 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                             # PAGE BREAK
                             tags$hr(),
                             
-                            # REport cover
-                            fluidRow(style="text-align: center; margin: auto; width: 60%;", 
-                                     img(src="overall_SAI.png", width="600px", align = "center"),
-                                     HTML("<h5><center>Our overall awareness of biodiversity is marginally increasing, although
-                                                 there are differences among taxonomic classes and languages, see "), tags$a("trends", onclick="fakeClick('TRENDS')"), HTML("</center></h5>"),
-                                     p(),
-                                     HTML("<h6><center>The global trend represents "), tags$strong("41,197"), HTML(" IUCN species (amphibians, birds, 
-                                                 insects, mammals, ray-finned fishes, and reptiles) across "), tags$strong("10 Wikipedia 
-                                                 languages"), HTML(" (Arabic, Chinese, English, French, German, Italian, Japanese, 
-                                                 Portuguese, Russian, Spanish) and over "), tags$strong("4 billion page-views"), HTML(".</center></h6>")
-                            ),
-                            
-                            fluidRow(
-                              
-                              style = "height:50px;"),
-                            
                             fluidRow(
                               column(4),
                               column(2,
@@ -107,7 +91,7 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                               ),
                               column(2,
                                      tags$div(align = "center", 
-                                              tags$a("Trends by Taxonomic group", 
+                                              tags$a("Explore the data", 
                                                      onclick="fakeClick('TRENDS')", 
                                                      class="btn btn-primary btn-lg")
                                      )
@@ -252,27 +236,58 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                             )
                    ), 
                    tabPanel("TRENDS", value = "TRENDS",
-                            fluidRow(
-                              column(6,
-                                     shinycssloaders::withSpinner(
-                                        plotOutput("overall_SAI")),
-                                     h6(style = "text-align: justify;", paste("Figure 1. The overall species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, French, German, Italian, Japanese, Portuguese, Russian, and Spanish, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
-                              
-                              column(6,
-                                     shinycssloaders::withSpinner(
-                                        plotOutput("class_SAI")),
-                                     h6(style = "text-align: justify;", paste("Figure 2. The species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish separated by taxonomic by class, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles)."))),
-                            br(),
-                            fluidRow(
-                              column(6,
-                                     shinycssloaders::withSpinner(
-                                        plotOutput("class_language_SAI")),
-                                     h6(style = "text-align: justify;", paste("Figure 3. The species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages for July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
-                              column(6,
-                                     shinycssloaders::withSpinner(
-                                        plotOutput("class_language_change")),
-                                     h6(style = "text-align: justify;", paste("Figure 4. Average monthly rate of change for the species page species awareness index (SAI) for 6 taxonomic classes across 10 Wikipedia languages, for the period January 2016-", format(as.Date(tail(overall_SAI$Year[grepl("-01-", overall_SAI$Year)], 1)), "%B %Y"), sep = ""), "(error bars, predicted values of a linear model, fitting average monthly change in the species page SAI as a function of taxonomic class, Wikipedia language, and their interaction). Fitted values are from the linear model with the R function predict (points), and 95% CIs are from the fitted values ± 1.96 multiplied by the SE."))
-                            )), # Closes About tab,
+                            
+                            tabsetPanel(
+                              tabPanel("Animals",
+                                fluidRow(
+                                  column(6,
+                                         shinycssloaders::withSpinner(
+                                            plotOutput("overall_SAI")),
+                                         h6(style = "text-align: justify;", paste("Figure 1. The overall species awareness index (SAI) for 12 classes of animals and plants on the Wikipedia languages Arabic, Chinese, English, French, German, Italian, Japanese, Portuguese, Russian, and Spanish, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                                  
+                                  column(6,
+                                         shinycssloaders::withSpinner(
+                                            plotOutput("class_SAI")),
+                                         h6(style = "text-align: justify;", paste("Figure 2. The species awareness index (SAI) for reptiles, ray-finned fishes, mammals, birds, insects, and amphibians on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish separated by taxonomic by class, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles)."))),
+                                br(),
+                                fluidRow(
+                                  column(6,
+                                         shinycssloaders::withSpinner(
+                                            plotOutput("class_language_SAI")),
+                                         h6(style = "text-align: justify;", paste("Figure 3. The species awareness index (SAI) for 6 animal taxonomic classes across 10 Wikipedia languages for July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                                  column(6,
+                                         shinycssloaders::withSpinner(
+                                            plotOutput("class_language_change")),
+                                         h6(style = "text-align: justify;", paste("Figure 4. Average monthly rate of change for the species page species awareness index (SAI) for 6 animal taxonomic classes across 10 Wikipedia languages, for the period January 2016-", format(as.Date(tail(overall_SAI$Year[grepl("-01-", overall_SAI$Year)], 1)), "%B %Y"), sep = ""), "(error bars, predicted values of a linear model, fitting average monthly change in the species page SAI as a function of taxonomic class, Wikipedia language, and their interaction). Fitted values are from the linear model with the R function predict (points), and 95% CIs are from the fitted values ± 1.96 multiplied by the SE."))
+                                )
+                            ),
+                             tabPanel("Plants", 
+                                      fluidRow(
+                                        column(6,
+                                               shinycssloaders::withSpinner(
+                                                 plotOutput("overall_SAI_plants")),
+                                               h6(style = "text-align: justify;", paste("Figure 1. The overall species awareness index (SAI) for 12 classes of animals and plants on the Wikipedia languages Arabic, Chinese, English, French, German, Italian, Japanese, Portuguese, Russian, and Spanish, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                                        
+                                        column(6,
+                                               shinycssloaders::withSpinner(
+                                                 plotOutput("class_SAI_plants")),
+                                               h6(style = "text-align: justify;", paste("Figure 2. The species awareness index (SAI) for the magnoliopsida, liliopsida, pinopsida, cycadopsida, polypodiopsida, and gnetopsida on the Wikipedia languages Arabic, Chinese, English, German, Italian, Japanese, Portuguese, Russian, and Spanish separated by taxonomic by class, for the period July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles)."))),
+                                      br(),
+                                      fluidRow(
+                                        column(6,
+                                               shinycssloaders::withSpinner(
+                                                 plotOutput("class_language_SAI_plants")),
+                                               h6(style = "text-align: justify;", paste("Figure 3. The species awareness index (SAI) for 6 plant taxonomic classes across 10 Wikipedia languages for July 2015-", format(as.Date(tail(overall_SAI$Year, 1)), "%B %Y"), sep = ""), "(lines, mean of bootstrapped indices at each monthly time step; shading, 2.5th and 97.5th percentiles).")),
+                                        column(6,
+                                               shinycssloaders::withSpinner(
+                                                 plotOutput("class_language_change_plants")),
+                                               h6(style = "text-align: justify;", paste("Figure 4. Average monthly rate of change for the species page species awareness index (SAI) for 6 plant taxonomic classes across 10 Wikipedia languages, for the period January 2016-", format(as.Date(tail(overall_SAI$Year[grepl("-01-", overall_SAI$Year)], 1)), "%B %Y"), sep = ""), "(error bars, predicted values of a linear model, fitting average monthly change in the species page SAI as a function of taxonomic class, Wikipedia language, and their interaction). Fitted values are from the linear model with the R function predict (points), and 95% CIs are from the fitted values ± 1.96 multiplied by the SE."))
+                                      )
+                             ))
+                            
+                            ), # Closes About tab,
+                            
+                              #       
                    tabPanel("DATA", value = "DATA",
                             tabsetPanel(
                               tabPanel("What is the SAI?", 
@@ -340,7 +355,7 @@ shinyUI(navbarPage(title=div(tags$a(href="",img(src="zsl_logo.png"), "")), id = 
                                                               
                                                               br(),
                                                               
-                                                              tags$p(h6("Click on the button below to download the averge monthly change in SAI per class and language.")),
+                                                              tags$p(h6("Click on the button below to download the average monthly change in SAI per class and language.")),
                                                               downloadButton("class_language_change_dl", label = "Download 4")
                                              )
                                              
